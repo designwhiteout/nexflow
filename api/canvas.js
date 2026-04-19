@@ -3,9 +3,9 @@
 // GET  /api/canvas?room=xxx  → 读取画布
 // POST /api/canvas?room=xxx  → 保存画布
 
-const { kv } = require('@vercel/kv');
+const Redis = require('ioredis');
+const redis = new Redis(process.env.REDIS_URL);
 
-const MAX_ROOMS = 100;           // 最多房间数
 const MAX_SIZE_BYTES = 500000;   // 单个画布最大 500KB
 
 // 简单跨域头
@@ -35,11 +35,11 @@ module.exports = async function handler(req, res) {
   // ── GET：读取画布 ──
   if (req.method === 'GET') {
     try {
-      const data = await kv.get(key);
+      const data = await redis.get(key);
       if (!data) {
         return res.status(200).json({ exists: false, canvas: null });
       }
-      return res.status(200).json({ exists: true, canvas: data });
+      return res.status(200).json({ exists: true, canvas: JSON.parse(data) });
     } catch (err) {
       console.error('GET error:', err);
       return res.status(500).json({ error: '读取失败，请稍后重试' });
@@ -57,8 +57,8 @@ module.exports = async function handler(req, res) {
         return res.status(413).json({ error: '画布数据过大（超过500KB）' });
       }
 
-      // 写入 KV，设置 TTL 90天
-      await kv.set(key, body, { ex: 60 * 60 * 24 * 90 });
+      // 写入 Redis，设置 TTL 90天
+      await redis.set(key, JSON.stringify(body), 'EX', 60 * 60 * 24 * 90);
 
       return res.status(200).json({ ok: true, room, savedAt: new Date().toISOString() });
     } catch (err) {
