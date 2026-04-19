@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MindFlow Canvas</title>
+<title>NexFlow Canvas</title>
 <style>
   /* ── 房间码入口页 ── */
   #room-gate {
@@ -60,7 +60,7 @@
   #canvas { position: absolute; width: 100%; height: 100%; cursor: grab; }
   #canvas.grabbing { cursor: grabbing; }
   #canvas-layer { position: absolute; top: 0; left: 0; transform-origin: 0 0; z-index: 1; }
-  
+
   /* SVG 连线层 */
   #svg-layer {
     position: absolute; top: 0; left: 0;
@@ -70,7 +70,7 @@
     overflow: visible;
   }
 
-  /* ── NODE — MindFlow 风格 ── */
+  /* ── NODE ── */
   .node {
     position: absolute;
     border-radius: 14px;
@@ -84,13 +84,12 @@
   }
   .node:hover { border-color: rgba(247,158,88,0.3); z-index: 11; }
   .node:active { cursor: grabbing; }
-  .node.selected { 
-    border-color: #F79E58; 
-    box-shadow: 0 0 0 4px rgba(247,158,88,0.3), 0 4px 20px rgba(0,0,0,0.1); 
+  .node.selected {
+    border-color: #F79E58;
+    box-shadow: 0 0 0 4px rgba(247,158,88,0.3), 0 4px 20px rgba(0,0,0,0.1);
     z-index: 12;
   }
   .node.dragging { z-index: 20; }
-  /* 节点白色遮罩层，确保遮挡下方的连线 */
   .node::before {
     content: '';
     position: absolute;
@@ -115,19 +114,16 @@
   .node:hover .conn-handle,
   .node.selected .conn-handle { opacity: 1; }
   .conn-handle:hover { transform: scale(1.3); }
-  /* 右侧中点 */
   .conn-handle.right {
     right: -7px; top: 50%;
     transform: translateY(-50%);
   }
   .conn-handle.right:hover { transform: translateY(-50%) scale(1.3); }
-  /* 左侧中点 */
   .conn-handle.left {
     left: -7px; top: 50%;
     transform: translateY(-50%);
   }
   .conn-handle.left:hover { transform: translateY(-50%) scale(1.3); }
-  /* 目标高亮 */
   .node.conn-target .conn-handle {
     background: #ffffff;
     box-shadow: 0 0 0 3px rgba(247,158,88,0.7);
@@ -163,17 +159,14 @@
     transition: all 0.15s;
   }
   .format-toolbar select:hover,
-  .format-toolbar button:hover {
-    background: #f0f0f0;
-  }
+  .format-toolbar button:hover { background: #f0f0f0; }
   .format-toolbar button.active {
     background: rgba(247,158,88,0.15);
     border-color: rgba(247,158,88,0.3);
     color: #F79E58;
   }
   .format-toolbar .sep {
-    width: 1px;
-    height: 18px;
+    width: 1px; height: 18px;
     background: rgba(0,0,0,0.08);
     margin: 0 2px;
   }
@@ -188,22 +181,11 @@
   }
   .node:hover .node-resize-line,
   .node.selected .node-resize-line { opacity: 1; }
-  .node-resize-line.top {
-    top: -2px; left: 14px; right: 14px; height: 2px;
-    cursor: n-resize;
-  }
-  .node-resize-line.bottom {
-    bottom: -2px; left: 14px; right: 14px; height: 2px;
-    cursor: s-resize;
-  }
-  .node-resize-line.left {
-    left: -2px; top: 14px; bottom: 14px; width: 2px;
-    cursor: w-resize;
-  }
-  .node-resize-line.right {
-    right: -2px; top: 14px; bottom: 14px; width: 2px;
-    cursor: e-resize;
-  }
+  .node-resize-line.top    { top: -2px; left: 14px; right: 14px; height: 2px; cursor: n-resize; }
+  .node-resize-line.bottom { bottom: -2px; left: 14px; right: 14px; height: 2px; cursor: s-resize; }
+  .node-resize-line.left   { left: -2px; top: 14px; bottom: 14px; width: 2px; cursor: w-resize; }
+  .node-resize-line.right  { right: -2px; top: 14px; bottom: 14px; width: 2px; cursor: e-resize; }
+
   /* 四角圆点 */
   .node-resize-corner {
     position: absolute;
@@ -221,9 +203,6 @@
   .node-resize-corner.bl { bottom: -5px; left: -5px; cursor: sw-resize; }
   .node-resize-corner.br { bottom: -5px; right: -5px; cursor: se-resize; }
 
-  /* 4角 Resize Handle - 已隐藏 */
-  .node-resize-handle { display: none; }
-
   /* 卡片主体 */
   .node-card {
     display: flex;
@@ -233,83 +212,51 @@
     background: #ffffff;
     border: 2px solid #F79E58;
   }
-  .node-card.selected { border-color: #F79E58; box-shadow: 0 0 0 3px rgba(247,158,88,0.4); }
   .node-card:not(.selected):not(.hover) { border-color: transparent; }
   .node-card.hover:not(.selected) { border-color: #E5E7EB; }
   .node:hover .node-card:not(.selected) { border-color: #E5E7EB; }
-  
+
   /* 输入区域 */
   .node-card-content {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
     padding: 0;
   }
   .node-content {
-    flex: 1;
-    min-height: 96px;
+    flex: 1; min-height: 96px;
     padding: 16px;
-    font-size: 20px;
-    line-height: 1.6;
-    color: #333;
-    outline: none;
-    border: none;
-    background: transparent;
-    width: 100%;
-    resize: none;
-    font-family: inherit;
-    overflow-y: auto;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    box-sizing: border-box;
+    font-size: 20px; line-height: 1.6;
+    color: #333; outline: none; border: none;
+    background: transparent; width: 100%;
+    resize: none; font-family: inherit;
+    overflow-y: auto; word-wrap: break-word;
+    white-space: pre-wrap; box-sizing: border-box;
     cursor: text;
   }
   .node-content:focus { color: #1a1a1a; }
   .node-content:empty::before {
     content: attr(data-placeholder);
-    color: #aaa;
-    pointer-events: none;
+    color: #aaa; pointer-events: none;
   }
   .node-content::-webkit-scrollbar { width: 4px; }
   .node-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
-  
+
   /* 底部 */
   .node-card-footer {
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     justify-content: flex-end;
-    padding: 6px 16px 12px;
-    gap: 8px;
-  }
-  .node-flow-port {
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 8px solid #E5E7EB;
-    opacity: 0;
-  }
-  .node-flow-trigger {
-    display: none;
+    padding: 6px 16px 12px; gap: 8px;
   }
 
-  /* 底部操作按钮 - 默认隐藏 */
+  /* 底部操作按钮 */
   .node-footer-actions {
-    display: flex;
-    gap: 6px;
-    opacity: 0;
-    transition: opacity 0.2s;
+    display: flex; gap: 6px;
+    opacity: 0; transition: opacity 0.2s;
   }
   .node:hover .node-footer-actions,
   .node.selected .node-footer-actions,
-  .node.ai-open .node-footer-actions {
-    opacity: 1;
-  }
+  .node.ai-open .node-footer-actions { opacity: 1; }
+
   .node-btn {
     width: 28px; height: 28px; border-radius: 6px; border: none;
     background: rgba(247,158,88,0.1); color: #F79E58; font-size: 12px;
@@ -320,74 +267,45 @@
   .node-btn.danger { background: rgba(224,92,92,0.1); color: #e05c5c; }
   .node-btn.danger:hover { background: rgba(224,92,92,0.2); }
 
-  /* AI panel — hidden by default, shown on demand */
+  /* AI panel */
   .node-ai-bar {
     display: none;
     background: #ffffff;
     border-radius: 10px;
     border: 1px solid rgba(0,0,0,0.08);
-    margin: 8px 0 0 0;
-    padding: 10px;
-    width: calc(100% - 0px);
-    box-sizing: border-box;
-    overflow: hidden;
+    margin: 8px 0 0 0; padding: 10px;
+    width: 100%; box-sizing: border-box; overflow: hidden;
   }
   .node-ai-bar.open { display: block; }
   .ai-input-row { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
   .ai-input {
     flex: 1; min-width: 0; background: rgba(247,158,88,0.08); border: none;
     border-radius: 8px; padding: 8px 10px; color: #333; font-size: 12px;
-    outline: none; font-family: inherit;
-    transition: background 0.2s;
-    box-sizing: border-box;
+    outline: none; font-family: inherit; transition: background 0.2s; box-sizing: border-box;
   }
   .ai-input:focus { background: rgba(247,158,88,0.15); }
   .ai-input::placeholder { color: #999; }
   .ai-send-btn {
     padding: 8px 10px; border-radius: 8px; border: none;
     background: #F79E58; color: #fff; font-size: 11px; cursor: pointer;
-    transition: background 0.15s;
-    white-space: nowrap;
-    flex-shrink: 0;
+    transition: background 0.15s; white-space: nowrap; flex-shrink: 0;
   }
   .ai-send-btn:hover { background: #e88a4a; }
   .ai-send-btn:disabled { background: #ccc; cursor: not-allowed; }
-
   .ai-response {
     position: relative;
     margin-top: 8px; padding: 10px;
-    background: rgba(247,158,88,0.08);
-    border-radius: 8px;
+    background: rgba(247,158,88,0.08); border-radius: 8px;
     font-size: 12px; line-height: 1.6; color: #333;
     min-height: 40px; max-height: 250px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    box-sizing: border-box;
+    overflow-y: auto; white-space: pre-wrap;
+    word-break: break-word; overflow-wrap: break-word; box-sizing: border-box;
   }
   .ai-response.loading { color: #999; font-style: italic; }
   .ai-response.error { color: #e05c5c; background: rgba(224,92,92,0.1); }
-
-  /* ── TOOLBAR ── */
-  #toolbar {
-    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
-    display: flex; gap: 6px; align-items: center;
-    background: #ffffff; border: 1.5px solid rgba(0,0,0,0.1);
-    border-radius: 16px; padding: 8px 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-    z-index: 1200;
-  }
-  .tb-btn {
-    display: flex; align-items: center; gap: 6px;
-    padding: 7px 13px; border-radius: 10px; border: none;
-    background: transparent; color: #666; font-size: 12.5px;
-    cursor: pointer; transition: background 0.15s, color 0.15s;
-    font-family: inherit;
-  }
-  .tb-btn:hover { background: rgba(0,0,0,0.05); color: #333; }
-  .tb-btn.active { background: rgba(247,158,88,0.15); color: #F79E58; }
-  .tb-sep { width: 1px; height: 24px; background: rgba(0,0,0,0.08); margin: 0 2px; }
+  .ai-response::-webkit-scrollbar { width: 4px; }
+  .ai-response::-webkit-scrollbar-track { background: transparent; }
+  .ai-response::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
 
   /* ── INFO PANEL ── */
   #info {
@@ -395,8 +313,7 @@
     font-size: 11.5px; color: rgba(0,0,0,0.4);
     pointer-events: none; line-height: 1.7;
     background: rgba(255,255,255,0.9);
-    padding: 10px 14px;
-    border-radius: 10px;
+    padding: 10px 14px; border-radius: 10px;
     border: 1px solid rgba(0,0,0,0.06);
     backdrop-filter: blur(8px);
   }
@@ -405,20 +322,8 @@
     font-size: 11px; color: rgba(0,0,0,0.3);
     pointer-events: none;
   }
-  /* 中上方标题 */
-  #app-title {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    font-size: 16px; font-weight: 600; color: #333;
-    pointer-events: none; letter-spacing: 0.5px;
-    padding: 8px 20px;
-    background: rgba(255,255,255,0.95);
-    border-radius: 20px;
-    border: 1px solid rgba(0,0,0,0.06);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    z-index: 50;
-  }
-  /* FAB 悬浮按钮 */
+
+  /* FAB 悬浮按钮 — FIXED: removed stray closing brace that was breaking all CSS below */
   #settings-fab, #chat-fab {
     position: fixed; width: 44px; height: 44px;
     border-radius: 12px; background: #fff;
@@ -434,7 +339,6 @@
   }
   #chat-fab { bottom: 20px; left: 20px; }
   #settings-fab { bottom: 20px; left: 74px; }
-}
 
   /* ── CONTEXT MENU ── */
   #ctx-menu {
@@ -446,28 +350,21 @@
   }
   .ctx-item {
     padding: 7px 12px; border-radius: 7px;
-    font-size: 13px; cursor: pointer; display: flex; gap: 8px; align-items: center;
-    transition: background 0.1s;
-    color: #333;
+    font-size: 13px; cursor: pointer;
+    display: flex; gap: 8px; align-items: center;
+    transition: background 0.1s; color: #333;
   }
   .ctx-item:hover { background: rgba(0,0,0,0.05); }
   .ctx-item.sep { border-top: 1px solid rgba(0,0,0,0.06); margin-top: 4px; padding-top: 10px; }
 
-  /* minimap — 右下角 */
+  /* minimap */
   #minimap {
-    position: fixed; bottom: 20px; right: 20px;
+    position: fixed; bottom: 80px; right: 20px;
     width: 200px; height: 150px;
-    background: #ffffff;
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    z-index: 100;
+    background: #ffffff; border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px; overflow: hidden; z-index: 100;
   }
-  #minimap-canvas2 {
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-  }
+  #minimap-canvas2 { width: 100%; height: 100%; border-radius: 8px; }
 
   /* toast */
   #toast {
@@ -481,32 +378,27 @@
   }
   #toast.show { opacity: 1; }
 
-  /* 框选样式 */
+  /* 框选 */
   #selection-box {
     position: fixed;
     border: 1.5px dashed #F79E58;
     background: rgba(247,158,88,0.1);
-    pointer-events: none;
-    z-index: 999;
-    display: none;
+    pointer-events: none; z-index: 999; display: none;
   }
 
   /* grid bg */
-  #canvas { background-color: #FAF9F6; background-image: radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px); background-size: 24px 24px; }
-
-  /* scrollbar inside ai-response */
-  .ai-response::-webkit-scrollbar { width: 4px; }
-  .ai-response::-webkit-scrollbar-track { background: transparent; }
-  .ai-response::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+  #canvas {
+    background-color: #FAF9F6;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
 
   /* ── LEFT CHAT PANEL ── */
   #chat-panel {
-    position: fixed; left: 74px; bottom: 80px; width: 380px;
-    height: 580px; max-height: calc(100vh - 120px);
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 16px;
-    display: flex; flex-direction: column;
+    position: fixed; left: 74px; bottom: 80px;
+    width: 380px; height: 580px; max-height: calc(100vh - 120px);
+    background: #fff; border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 16px; display: flex; flex-direction: column;
     z-index: 500; transform: translateY(20px) scale(0.95);
     opacity: 0; pointer-events: none;
     box-shadow: 0 8px 40px rgba(0,0,0,0.15);
@@ -516,31 +408,14 @@
     transform: translateY(0) scale(1);
     opacity: 1; pointer-events: auto;
   }
-
   .chat-header {
     padding: 14px 18px;
     border-bottom: 1px solid rgba(0,0,0,0.06);
-    display: flex; align-items: center; gap: 10px;
-    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
     background: linear-gradient(to bottom, #fff, #fafafa);
     border-radius: 16px 16px 0 0;
   }
-
-  .chat-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    display: flex; align-items: center; gap: 10px;
-    flex-shrink: 0;
-    background: linear-gradient(to bottom, #fff, #fafafa);
-    border-radius: 16px 16px 0 0;
-  }
-  .chat-header-title {
-    font-size: 14px; font-weight: 600; color: #333;
-    flex: 1;
-  }
-  .chat-header-title span {
-    font-size: 11px; color: #999; font-weight: 400; margin-left: 6px;
-  }
+  .chat-header-title { font-size: 14px; font-weight: 600; color: #333; flex: 1; }
   .chat-toggle-btn {
     width: 28px; height: 28px; border-radius: 8px; border: none;
     background: rgba(0,0,0,0.05); color: #666; font-size: 14px;
@@ -548,14 +423,12 @@
     transition: background 0.15s;
   }
   .chat-toggle-btn:hover { background: rgba(0,0,0,0.1); color: #333; }
-
   .chat-messages {
     flex: 1; overflow-y: auto; padding: 16px 18px;
     display: flex; flex-direction: column; gap: 14px;
   }
   .chat-messages::-webkit-scrollbar { width: 4px; }
   .chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
-
   .chat-msg { font-size: 13px; line-height: 1.7; }
   .chat-msg.user { color: #333; }
   .chat-msg.ai { color: #555; }
@@ -569,28 +442,28 @@
     display: inline-block; margin: 2px 3px;
     padding: 2px 8px; border-radius: 5px;
     background: rgba(247,158,88,0.1); color: #F79E58;
-    font-size: 11.5px; cursor: pointer;
-    transition: background 0.15s;
+    font-size: 11.5px; cursor: pointer; transition: background 0.15s;
   }
   .chat-msg .msg-text .node-link:hover { background: rgba(247,158,88,0.2); }
-
   .chat-actions {
     padding: 10px 14px 12px;
     border-top: 1px solid rgba(0,0,0,0.06);
     display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0;
   }
   .chat-action-btn {
-    padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);
-    background: rgba(0,0,0,0.03); color: #666; font-size: 12px;
-    cursor: pointer; font-family: inherit; transition: all 0.15s;
+    padding: 6px 12px; border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.03); color: #666;
+    font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s;
   }
-  .chat-action-btn:hover { background: rgba(247,158,88,0.1); border-color: rgba(247,158,88,0.2); color: #F79E58; }
-
+  .chat-action-btn:hover {
+    background: rgba(247,158,88,0.1);
+    border-color: rgba(247,158,88,0.2); color: #F79E58;
+  }
   .chat-input-area {
     padding: 12px 16px 16px;
     border-top: 1px solid rgba(0,0,0,0.06);
-    flex-shrink: 0;
-    background: #fafafa;
+    flex-shrink: 0; background: #fafafa;
     border-radius: 0 0 16px 16px;
   }
   .chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
@@ -612,21 +485,15 @@
   }
   .chat-send-btn:hover { background: #e88a4a; transform: scale(1.05); }
   .chat-send-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
-  .chat-hint {
-    font-size: 10.5px; color: rgba(0,0,0,0.3);
-    margin-top: 8px; text-align: center;
-  }
-
-
-
+  .chat-hint { font-size: 10.5px; color: rgba(0,0,0,0.3); margin-top: 8px; text-align: center; }
 </style>
 </head>
 <body>
 
-<!-- ── 房间码入口页 ── -->
+<!-- 房间码入口页 -->
 <div id="room-gate">
   <div class="gate-box">
-    <div class="gate-logo">Mind<span>Flow</span></div>
+    <div class="gate-logo">Nex<span>Flow</span></div>
     <div class="gate-sub">AI 无限画布思维工作台</div>
     <label class="gate-label">房间码（同一房间码共享同一画布）</label>
     <input class="gate-input" id="room-input" type="text"
@@ -644,7 +511,6 @@
 <div id="canvas-wrap">
   <div id="canvas">
     <div id="canvas-layer">
-      <!-- SVG 连线层 - 放在canvas-layer内部，跟随变换 -->
       <svg id="svg-layer"><defs></defs></svg>
     </div>
   </div>
@@ -660,10 +526,7 @@
 <div id="room-label" style="position:fixed;top:20px;right:80px;font-size:11px;color:rgba(0,0,0,0.3);pointer-events:none;background:rgba(255,255,255,0.9);padding:4px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);backdrop-filter:blur(8px);"></div>
 <div id="sync-status" style="position:fixed;top:56px;right:80px;font-size:11px;color:#50c878;pointer-events:none;opacity:0;transition:opacity 0.4s;"></div>
 
-<!-- 左下角设置按钮 -->
 <div id="settings-fab" onclick="toggleSettingsPanel()" title="API 设置">⚙️</div>
-
-<!-- 右下角助手按钮 -->
 <div id="chat-fab" onclick="toggleChatPanel()" title="AI 助手">💬</div>
 
 <div id="ctx-menu">
@@ -678,28 +541,22 @@
 <div id="viewport" style="position:fixed;inset:0;pointer-events:none;"></div>
 <div id="selection-box"></div>
 <div id="minimap"><canvas id="minimap-canvas2" width="200" height="150"></canvas></div>
-
 <div id="toast"></div>
 
-<!-- Right chat panel -->
+<!-- Chat panel -->
 <div id="chat-panel">
   <div class="chat-header">
     <span class="chat-header-title">🤖 AI 助手</span>
     <span id="api-status" style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,0.05);color:#999;margin-left:4px;">未连接</span>
     <button class="chat-toggle-btn" onclick="toggleChatPanel()" title="收起">✕</button>
   </div>
-
   <div class="chat-messages" id="chat-messages">
     <div class="chat-msg system">
       <div class="msg-role">助手</div>
       <div class="msg-text">你好！我是你的 AI 助手。<br><br>我可以帮你：<br>• 根据你的想法自动生成新节点<br>• 总结画布上的所有内容<br>• 解答关于项目的问题<br><br>输入消息即可开始对话~<br><br><span id="chat-api-hint" style="color:#999;font-size:11px;">⚠️ 请先在设置中配置 SiliconFlow API Key</span></div>
     </div>
   </div>
-
-  <div class="chat-actions" id="chat-actions" style="display:none;">
-    <!-- dynamic action buttons appear here -->
-  </div>
-
+  <div class="chat-actions" id="chat-actions" style="display:none;"></div>
   <div class="chat-input-area">
     <div class="chat-input-row">
       <textarea class="chat-input" id="chat-input" rows="1" placeholder="描述你的想法，按 Enter 发送..."
@@ -714,7 +571,6 @@
 <!-- API 设置面板 -->
 <div id="settings-panel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:16px;padding:24px;width:420px;max-width:90vw;z-index:3000;box-shadow:0 8px 40px rgba(0,0,0,0.2);">
   <h3 style="margin:0 0 16px;font-size:16px;color:#333;">⚙️ 画布设置</h3>
-  
   <div style="margin-bottom:14px;">
     <label style="display:block;font-size:12px;color:#666;margin-bottom:6px;">硅基流动 API Key</label>
     <input type="password" id="sf-api-key" placeholder="sk-..." style="width:100%;padding:10px 12px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;font-size:13px;box-sizing:border-box;" />
@@ -723,7 +579,6 @@
       <a href="https://cloud.siliconflow.cn" target="_blank" style="color:#F79E58;">获取API Key →</a>
     </div>
   </div>
-  
   <div style="margin-bottom:14px;">
     <label style="display:block;font-size:12px;color:#666;margin-bottom:6px;">模型选择</label>
     <select id="sf-model" style="width:100%;padding:10px 12px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;font-size:13px;">
@@ -733,20 +588,16 @@
       <option value="Qwen/Qwen2.5-72B-Instruct">Qwen 2.5 72B（付费）</option>
     </select>
   </div>
-  
   <div style="margin-bottom:16px;">
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;cursor:pointer;">
       <input type="checkbox" id="sf-websearch" checked style="width:16px;height:16px;" />
       启用联网搜索（识别"搜索/查找/最新"等关键词）
     </label>
   </div>
-  
   <div style="display:flex;gap:10px;justify-content:flex-end;">
     <button onclick="closeSettingsPanel()" style="padding:8px 16px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;background:#fff;font-size:13px;cursor:pointer;">取消</button>
     <button onclick="saveSettings()" style="padding:8px 16px;border:none;border-radius:8px;background:#F79E58;color:#fff;font-size:13px;cursor:pointer;">保存</button>
   </div>
-
-  <!-- 画布保存/加载 -->
   <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.08);">
     <h4 style="margin:0 0 12px;font-size:14px;color:#333;">💾 画布文件</h4>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -764,17 +615,17 @@
 //  STATE
 // ════════════════════════════════════════════
 let transform = { x: 0, y: 0, scale: 1 };
-let nodes = {};      // id → { el, x, y, type, content }
-let connections = []; // [{from, to}]
+let nodes = {};
+let connections = [];
 let nodeCounter = 0;
-let selectedNodes = []; // 多选支持：选中的节点ID数组
-let chatHistory = [];  // [{role, content}]
+let selectedNodes = [];
+let chatHistory = [];
 
-// 撤销/重做历史
+// 撤销/重做
 let undoStack = [];
 let redoStack = [];
 const MAX_UNDO = 50;
-let _isRestoring = false; // 标记是否正在恢复状态
+let _isRestoring = false;
 
 function saveState() {
   if (_isRestoring) return;
@@ -799,34 +650,26 @@ function saveState() {
 
 function undo() {
   if (undoStack.length === 0) return;
-  // 保存当前状态到 redo
-  const current = {
-    nodes: Object.fromEntries(
-      Object.entries(nodes).map(([id, n]) => [id, {
-        x: n.x, y: n.y, type: n.type,
-        content: n.content || '',
-        htmlContent: n.el.querySelector('.node-content')?.innerHTML || '',
-        width: n.el.offsetWidth,
-        height: n.el.offsetHeight
-      }])
-    ),
-    connections: connections.map(c => ({...c})),
-    nodeCounter
-  };
+  const current = captureCurrentState();
   redoStack.push(current);
-
-  // 恢复到上一个状态
   _isRestoring = true;
-  const state = undoStack.pop();
-  restoreState(state);
+  restoreState(undoStack.pop());
   _isRestoring = false;
   updateUndoRedoBtns();
 }
 
 function redo() {
   if (redoStack.length === 0) return;
-  // 保存当前状态到 undo
-  const current = {
+  const current = captureCurrentState();
+  undoStack.push(current);
+  _isRestoring = true;
+  restoreState(redoStack.pop());
+  _isRestoring = false;
+  updateUndoRedoBtns();
+}
+
+function captureCurrentState() {
+  return {
     nodes: Object.fromEntries(
       Object.entries(nodes).map(([id, n]) => [id, {
         x: n.x, y: n.y, type: n.type,
@@ -839,156 +682,135 @@ function redo() {
     connections: connections.map(c => ({...c})),
     nodeCounter
   };
-  undoStack.push(current);
-
-  // 恢复到 redo 状态
-  _isRestoring = true;
-  const state = redoStack.pop();
-  restoreState(state);
-  _isRestoring = false;
-  updateUndoRedoBtns();
 }
 
 function restoreState(state) {
-  // 清空画布上的节点 DOM
   Object.values(nodes).forEach(n => n.el && n.el.remove());
   nodes = {};
   connections = [];
-
-  // 恢复节点数据
   nodeCounter = state.nodeCounter;
+
   Object.entries(state.nodes).forEach(([id, nd]) => {
-    const el = document.createElement('div');
-    el.className = `node type-${nd.type}`;
-    el.id = id;
-    el.style.left = nd.x + 'px';
-    el.style.top = nd.y + 'px';
-    el.style.width = (nd.width || 280) + 'px';
-    el.style.height = (nd.height || 160) + 'px';
-    
-    // 使用富文本 HTML 内容恢复
-    const htmlContent = nd.htmlContent || nd.content || '';
-    el.innerHTML = `
-      <div class="node-resize-line top" data-dir="top"></div>
-      <div class="node-resize-line bottom" data-dir="bottom"></div>
-      <div class="node-resize-line left" data-dir="left"></div>
-      <div class="node-resize-line right" data-dir="right"></div>
-      <div class="node-resize-corner tl"></div>
-      <div class="node-resize-corner tr"></div>
-      <div class="node-resize-corner bl"></div>
-      <div class="node-resize-corner br" data-fit="true" title="双击自动适应内容"></div>
-      <div class="conn-handle right" data-side="right"></div>
-      <div class="conn-handle left" data-side="left"></div>
-      <div class="node-card">
-        <div class="node-card-content">
-          <div class="format-toolbar" id="fmt-${id}">
-            <button class="fmt-bold" onmousedown="event.preventDefault(); applyFormat('${id}', 'bold')" title="加粗">B</button>
-            <button class="fmt-italic" onmousedown="event.preventDefault(); applyFormat('${id}', 'italic')" title="斜体">I</button>
-            <div class="sep"></div>
-            <button class="fmt-size-up" onmousedown="event.preventDefault(); applyFormat('${id}', 'sizeUp')" title="字号增大">A↑</button>
-            <button class="fmt-size-down" onmousedown="event.preventDefault(); applyFormat('${id}', 'sizeDown')" title="字号减小">A↓</button>
-          </div>
-          <div class="node-content" contenteditable="true" spellcheck="false" data-placeholder="输入你的 Prompt..." oninput="onNodeInput('${id}', this); autoGrowDiv(this);" onmouseup="checkSelection('${id}'); saveSelection('${id}')" onkeyup="checkSelection('${id}'); saveSelection('${id}')">${htmlContent}</div>
-        </div>
-        <div class="node-card-footer">
-          <div class="node-flow-port" data-disabled="true"></div>
-          <div class="node-flow-trigger"></div>
-          <div class="node-footer-actions">
-            <button class="node-btn" title="问 AI" onclick="toggleAI('${id}')">▼</button>
-            <button class="node-btn danger" title="删除" onclick="deleteNode('${id}')">✕</button>
-          </div>
-        </div>
-      </div>
-      <div class="node-ai-bar" id="ai-bar-${id}">
-        <div class="ai-input-row">
-          <input class="ai-input" id="ai-input-${id}" placeholder="问 AI..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();askAI('${id}')}" />
-          <button class="ai-send-btn" onclick="askAI('${id}')">发送</button>
-        </div>
-        <div class="ai-response"></div>
-      </div>
-    `;
+    const el = buildNodeEl(id, nd.type, nd.x, nd.y, nd.width || 200, nd.height || 100, nd.htmlContent || nd.content || '');
     canvasLayer.appendChild(el);
     nodes[id] = { el, x: nd.x, y: nd.y, type: nd.type, content: nd.content || '' };
     setupNodeEvents(el, id);
   });
 
-  // 恢复连接
   connections = state.connections.map(c => ({...c}));
   drawConnections();
   drawMinimap();
   deselectAll();
 }
 
+// ════════════════════════════════════════════
+//  BUILD NODE ELEMENT (shared by createNode & restoreState)
+// ════════════════════════════════════════════
+function buildNodeEl(id, type, x, y, width, height, htmlContent) {
+  const el = document.createElement('div');
+  el.className = `node type-${type}`;
+  el.id = id;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.width = (width || 200) + 'px';
+  el.style.height = (height || 100) + 'px';
+  el.innerHTML = `
+    <div class="node-resize-line top" data-dir="top"></div>
+    <div class="node-resize-line bottom" data-dir="bottom"></div>
+    <div class="node-resize-line left" data-dir="left"></div>
+    <div class="node-resize-line right" data-dir="right"></div>
+    <div class="node-resize-corner tl"></div>
+    <div class="node-resize-corner tr"></div>
+    <div class="node-resize-corner bl"></div>
+    <div class="node-resize-corner br" data-fit="true" title="双击自动适应内容"></div>
+    <div class="conn-handle right" data-side="right"></div>
+    <div class="conn-handle left" data-side="left"></div>
+    <div class="node-card">
+      <div class="node-card-content">
+        <div class="format-toolbar" id="fmt-${id}">
+          <button class="fmt-bold" onmousedown="event.preventDefault(); applyFormat('${id}', 'bold')" title="加粗">B</button>
+          <button class="fmt-italic" onmousedown="event.preventDefault(); applyFormat('${id}', 'italic')" title="斜体">I</button>
+          <div class="sep"></div>
+          <button class="fmt-size-up" onmousedown="event.preventDefault(); applyFormat('${id}', 'sizeUp')" title="字号增大">A↑</button>
+          <button class="fmt-size-down" onmousedown="event.preventDefault(); applyFormat('${id}', 'sizeDown')" title="字号减小">A↓</button>
+        </div>
+        <div class="node-content" contenteditable="true" spellcheck="false"
+          data-placeholder="输入你的 Prompt..."
+          oninput="onNodeInput('${id}', this); autoGrowDiv(this);"
+          onmouseup="checkSelection('${id}'); saveSelectionRange('${id}')"
+          onkeyup="checkSelection('${id}'); saveSelectionRange('${id}')"
+        >${htmlContent}</div>
+      </div>
+      <div class="node-card-footer">
+        <div class="node-footer-actions">
+          <button class="node-btn" title="问 AI" onclick="toggleAI('${id}')">▼</button>
+          <button class="node-btn danger" title="删除" onclick="deleteNode('${id}')">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="node-ai-bar" id="ai-bar-${id}">
+      <div class="ai-input-row">
+        <input class="ai-input" id="ai-input-${id}" placeholder="问 AI..."
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();askAI('${id}')}" />
+        <button class="ai-send-btn" onclick="askAI('${id}')">发送</button>
+      </div>
+      <div class="ai-response"></div>
+    </div>
+  `;
+  return el;
+}
+
 function setupNodeEvents(el, id) {
-  // 鼠标悬停显示底部选项
-  el.addEventListener('mouseenter', () => {
-    const card = el.querySelector('.node-card');
-    if (card) card.classList.add('hover');
-  });
-  el.addEventListener('mouseleave', () => {
-    const card = el.querySelector('.node-card');
-    if (card) card.classList.remove('hover');
-  });
+  el.addEventListener('mouseenter', () => el.querySelector('.node-card')?.classList.add('hover'));
+  el.addEventListener('mouseleave', () => el.querySelector('.node-card')?.classList.remove('hover'));
+  el.addEventListener('mousedown', (e) => { e.stopPropagation(); selectNode(id); });
 
   makeDraggable(el, id);
 
-  el.addEventListener('mousedown', (e) => {
-    e.stopPropagation();
-    selectNode(id);
-  });
-
-  // 节点大小调整
+  // 4边 resize
   let resizing = false, resizeDir = '', rsx, rsy, rox, roy, rsw, rsh;
   el.querySelectorAll('.node-resize-line').forEach(handle => {
     handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      resizing = true;
-      resizeDir = handle.dataset.dir;
+      e.preventDefault(); e.stopPropagation();
+      resizing = true; resizeDir = handle.dataset.dir;
       rsx = e.clientX; rsy = e.clientY;
       rox = nodes[id].x; roy = nodes[id].y;
       rsw = el.offsetWidth; rsh = el.offsetHeight;
       selectNode(id);
     });
   });
-
   window.addEventListener('mousemove', (e) => {
     if (!resizing) return;
     const dx = (e.clientX - rsx) / transform.scale;
     const dy = (e.clientY - rsy) / transform.scale;
     const minW = 200, minH = 100;
     let newX = rox, newY = roy, newW = rsw, newH = rsh;
-    if (resizeDir === 'right') newW = Math.max(minW, rsw + dx);
-    else if (resizeDir === 'bottom') newH = Math.max(minH, rsh + dy);
-    else if (resizeDir === 'left') { newW = Math.max(minW, rsw - dx); newX = rox + (rsw - newW); }
-    else if (resizeDir === 'top') { newH = Math.max(minH, rsh - dy); newY = roy + (rsh - newH); }
+    if (resizeDir === 'right')  newW = Math.max(minW, rsw + dx);
+    if (resizeDir === 'bottom') newH = Math.max(minH, rsh + dy);
+    if (resizeDir === 'left')  { newW = Math.max(minW, rsw - dx); newX = rox + (rsw - newW); }
+    if (resizeDir === 'top')   { newH = Math.max(minH, rsh - dy); newY = roy + (rsh - newH); }
     nodes[id].x = newX; nodes[id].y = newY;
     el.style.left = newX + 'px'; el.style.top = newY + 'px';
     el.style.width = newW + 'px'; el.style.height = newH + 'px';
-    const aiBar = el.querySelector('.node-ai-bar');
-    if (aiBar) aiBar.style.width = newW + 'px';
     drawConnections();
   });
-
   window.addEventListener('mouseup', () => { if (resizing) { resizing = false; drawMinimap(); } });
 
-  // 四角调整
+  // 4角 resize
   let cornerResizing = false, cornerDir = '', crsx, crsy, crox, croy, crsw, crsh;
   el.querySelectorAll('.node-resize-corner').forEach(handle => {
     handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       cornerResizing = true;
-      cornerDir = handle.className.includes('tl') ? 'tl' :
-                   handle.className.includes('tr') ? 'tr' :
-                   handle.className.includes('bl') ? 'bl' : 'br';
+      cornerDir = handle.classList.contains('tl') ? 'tl' :
+                  handle.classList.contains('tr') ? 'tr' :
+                  handle.classList.contains('bl') ? 'bl' : 'br';
       crsx = e.clientX; crsy = e.clientY;
       crox = nodes[id].x; croy = nodes[id].y;
       crsw = el.offsetWidth; crsh = el.offsetHeight;
       selectNode(id);
     });
   });
-
   window.addEventListener('mousemove', (e) => {
     if (!cornerResizing) return;
     const dx = (e.clientX - crsx) / transform.scale;
@@ -1002,20 +824,14 @@ function setupNodeEvents(el, id) {
     nodes[id].x = newX; nodes[id].y = newY;
     el.style.left = newX + 'px'; el.style.top = newY + 'px';
     el.style.width = newW + 'px'; el.style.height = newH + 'px';
-    const aiBar = el.querySelector('.node-ai-bar');
-    if (aiBar) aiBar.style.width = newW + 'px';
     drawConnections();
   });
-
   window.addEventListener('mouseup', () => { if (cornerResizing) { cornerResizing = false; drawMinimap(); } });
 
   // 右下角双击自动适应
   const fitHandle = el.querySelector('.node-resize-corner.br[data-fit="true"]');
   if (fitHandle) {
-    fitHandle.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      fitNodeToContent(id);
-    });
+    fitHandle.addEventListener('dblclick', (e) => { e.stopPropagation(); fitNodeToContent(id); });
   }
 }
 
@@ -1026,20 +842,15 @@ function updateUndoRedoBtns() {
   if (rb) rb.disabled = redoStack.length === 0;
 }
 
-// 键盘快捷键
 document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
-    e.preventDefault();
-    undo();
-  }
-  if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-    e.preventDefault();
-    redo();
-  }
+  if (e.ctrlKey && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
 });
 
-// 连线状态
-let _conn = null; // { fromId, fromX, fromY, path } | null
+// ════════════════════════════════════════════
+//  CANVAS VARS
+// ════════════════════════════════════════════
+let _conn = null;
 let chatPanelOpen = false;
 let isDraggingCanvas = false;
 let dragStart = { x: 0, y: 0 };
@@ -1053,49 +864,33 @@ let apiConfig = {
   webSearch: localStorage.getItem('sf_websearch') !== 'false'
 };
 
-// 复制粘贴支持
-let clipboardNodes = []; // [{type, content, x, y, width, height, htmlContent}]
+let clipboardNodes = [];
 
-// 复制选中的节点
 function copySelectedNodes() {
-  if (selectedNodes.length === 0) {
-    toast('请先选中节点');
-    return;
-  }
+  if (selectedNodes.length === 0) { toast('请先选中节点'); return; }
   clipboardNodes = selectedNodes.map(id => {
     const nd = nodes[id];
     const contentEl = nd.el.querySelector('.node-content');
     return {
-      type: nd.type,
-      content: contentEl?.innerText || '',
+      type: nd.type, content: contentEl?.innerText || '',
       htmlContent: contentEl?.innerHTML || '',
-      x: nd.x,
-      y: nd.y,
-      width: nd.el.offsetWidth,
-      height: nd.el.offsetHeight
+      x: nd.x, y: nd.y,
+      width: nd.el.offsetWidth, height: nd.el.offsetHeight
     };
   });
   toast(`已复制 ${clipboardNodes.length} 个节点`);
 }
 
-// 粘贴节点
 function pasteNodes() {
-  if (clipboardNodes.length === 0) {
-    toast('剪贴板为空');
-    return;
-  }
+  if (clipboardNodes.length === 0) { toast('剪贴板为空'); return; }
   saveState();
-  const offsetX = 30, offsetY = 30;
   const newIds = [];
   clipboardNodes.forEach(nd => {
-    const newId = createNode(nd.type, nd.x + offsetX, nd.y + offsetY, nd.content, false, nd.width, nd.height, nd.htmlContent);
+    const newId = createNode(nd.type, nd.x + 30, nd.y + 30, nd.content, false, nd.width, nd.height, nd.htmlContent);
     newIds.push(newId);
   });
-  
-  // 清空选中，选中新粘贴的节点
   deselectAll();
   newIds.forEach(id => selectNode(id, true));
-  
   toast(`已粘贴 ${newIds.length} 个节点`);
 }
 
@@ -1108,7 +903,6 @@ function loadApiConfig() {
   };
 }
 
-// 保存 SiliconFlow 配置
 function saveApiConfig(key, model, webSearch) {
   if (key) localStorage.setItem('sf_key', key);
   if (model) localStorage.setItem('sf_model', model);
@@ -1116,23 +910,19 @@ function saveApiConfig(key, model, webSearch) {
   apiConfig = loadApiConfig();
 }
 
-const nodeTypes = {
-  idea:     { color: '#F5F0E6' },
-};
+const nodeTypes = { idea: { color: '#F5F0E6' } };
 
-const canvasEl   = document.getElementById('canvas');
+const canvasEl    = document.getElementById('canvas');
 const canvasLayer = document.getElementById('canvas-layer');
-const svgLayer   = document.getElementById('svg-layer');
-const zoomLabel  = document.getElementById('zoom-label');
-const ctxMenu    = document.getElementById('ctx-menu');
+const svgLayer    = document.getElementById('svg-layer');
+const zoomLabel   = document.getElementById('zoom-label');
+const ctxMenu     = document.getElementById('ctx-menu');
 
 // ════════════════════════════════════════════
 //  CANVAS TRANSFORM
 // ════════════════════════════════════════════
 function applyTransform() {
-  const t = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
-  canvasLayer.style.transform = t;
-  // SVG跟随canvas-layer的transform，不需要单独设置
+  canvasLayer.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
   zoomLabel.textContent = Math.round(transform.scale * 100) + '%';
   drawConnections();
   drawMinimap();
@@ -1143,15 +933,13 @@ canvasEl.addEventListener('wheel', (e) => {
   const delta = e.deltaY > 0 ? 0.92 : 1.08;
   const newScale = Math.min(3, Math.max(0.15, transform.scale * delta));
   const rect = canvasEl.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
   transform.x = mx - (mx - transform.x) * (newScale / transform.scale);
   transform.y = my - (my - transform.y) * (newScale / transform.scale);
   transform.scale = newScale;
   applyTransform();
 }, { passive: false });
 
-// double click on canvas → add node
 canvasEl.addEventListener('dblclick', (e) => {
   if (e.target !== canvasEl) return;
   const pos = screenToCanvas(e.clientX, e.clientY);
@@ -1159,94 +947,62 @@ canvasEl.addEventListener('dblclick', (e) => {
   createNode('idea', pos.x, pos.y, '');
 });
 
+// 框选模式变量
+let isSelecting = false;
+let selStartX, selStartY;
+const selBox = document.getElementById('selection-box');
 
-
-
-// canvas pan via direct drag
 canvasEl.addEventListener('mousedown', (e) => {
-  // Ctrl+左键 开始框选
   if (e.ctrlKey) {
     e.preventDefault();
     isSelecting = true;
-    selStartX = e.clientX;
-    selStartY = e.clientY;
-    selBox.style.left = selStartX + 'px';
-    selBox.style.top = selStartY + 'px';
-    selBox.style.width = '0';
-    selBox.style.height = '0';
+    selStartX = e.clientX; selStartY = e.clientY;
+    selBox.style.left = selStartX + 'px'; selBox.style.top = selStartY + 'px';
+    selBox.style.width = '0'; selBox.style.height = '0';
     selBox.style.display = 'block';
-    // 取消当前选中
     Object.values(nodes).forEach(n => n.el.classList.remove('selected'));
     selectedNodes = [];
     return;
   }
-  
-  // 点击空白处取消选中
   if (e.target === canvasEl || e.target === canvasLayer || e.target === svgLayer) {
     Object.values(nodes).forEach(n => n.el.classList.remove('selected'));
     selectedNodes = [];
-    // 清除文字选中
     window.getSelection()?.removeAllRanges();
   }
-  
   isDraggingCanvas = true;
   dragStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
   canvasEl.classList.add('grabbing');
 });
 
 window.addEventListener('mousemove', (e) => {
-  if (!isDraggingCanvas) return;
-  transform.x = e.clientX - dragStart.x;
-  transform.y = e.clientY - dragStart.y;
-  applyTransform();
-});
-
-window.addEventListener('mouseup', () => {
-  isDraggingCanvas = false;
-  canvasEl.classList.remove('grabbing');
-});
-
-// right click - 普通右键菜单
-canvasEl.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-  const pos = screenToCanvas(e.clientX, e.clientY);
-  ctxPos = pos;
-  ctxMenu.style.left = e.clientX + 'px';
-  ctxMenu.style.top  = e.clientY + 'px';
-  ctxMenu.style.display = 'block';
-});
-
-window.addEventListener('mousemove', (e) => {
-  if (!isSelecting) return;
-  const x = Math.min(selStartX, e.clientX);
-  const y = Math.min(selStartY, e.clientY);
-  const w = Math.abs(e.clientX - selStartX);
-  const h = Math.abs(e.clientY - selStartY);
-  selBox.style.left = x + 'px';
-  selBox.style.top = y + 'px';
-  selBox.style.width = w + 'px';
-  selBox.style.height = h + 'px';
+  if (isDraggingCanvas) {
+    transform.x = e.clientX - dragStart.x;
+    transform.y = e.clientY - dragStart.y;
+    applyTransform();
+  }
+  if (isSelecting) {
+    const x = Math.min(selStartX, e.clientX);
+    const y = Math.min(selStartY, e.clientY);
+    selBox.style.left = x + 'px'; selBox.style.top = y + 'px';
+    selBox.style.width = Math.abs(e.clientX - selStartX) + 'px';
+    selBox.style.height = Math.abs(e.clientY - selStartY) + 'px';
+  }
 });
 
 window.addEventListener('mouseup', (e) => {
+  isDraggingCanvas = false;
+  canvasEl.classList.remove('grabbing');
+
   if (isSelecting) {
     isSelecting = false;
     selBox.style.display = 'none';
-    
     const selRect = {
-      left: Math.min(selStartX, e.clientX),
-      top: Math.min(selStartY, e.clientY),
-      right: Math.max(selStartX, e.clientX),
-      bottom: Math.max(selStartY, e.clientY)
+      left: Math.min(selStartX, e.clientX), top: Math.min(selStartY, e.clientY),
+      right: Math.max(selStartX, e.clientX), bottom: Math.max(selStartY, e.clientY)
     };
-    
     if (selRect.right - selRect.left > 5 && selRect.bottom - selRect.top > 5) {
-      // 框选：清除之前的选中，添加新的选中
-      selectedNodes.forEach(sid => {
-        document.getElementById(sid)?.classList.remove('selected');
-      });
+      selectedNodes.forEach(sid => document.getElementById(sid)?.classList.remove('selected'));
       selectedNodes = [];
-      
       Object.entries(nodes).forEach(([id, n]) => {
         const nr = n.el.getBoundingClientRect();
         if (nr.left < selRect.right && nr.right > selRect.left &&
@@ -1255,20 +1011,20 @@ window.addEventListener('mouseup', (e) => {
           selectedNodes.push(id);
         }
       });
-      
-      if (selectedNodes.length > 0) {
-        toast(`已选中 ${selectedNodes.length} 个节点`);
-      }
+      if (selectedNodes.length > 0) toast(`已选中 ${selectedNodes.length} 个节点`);
     }
   }
 });
 
-window.addEventListener('click', () => { ctxMenu.style.display = 'none'; });
+canvasEl.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  ctxPos = screenToCanvas(e.clientX, e.clientY);
+  ctxMenu.style.left = e.clientX + 'px';
+  ctxMenu.style.top  = e.clientY + 'px';
+  ctxMenu.style.display = 'block';
+});
 
-// 框选模式变量
-let isSelecting = false;
-let selStartX, selStartY;
-const selBox = document.getElementById('selection-box');
+window.addEventListener('click', () => { ctxMenu.style.display = 'none'; });
 
 function screenToCanvas(sx, sy) {
   const rect = canvasEl.getBoundingClientRect();
@@ -1291,283 +1047,107 @@ function canvasToScreen(cx, cy) {
 // ════════════════════════════════════════════
 function createNode(type, x, y, content = '', autoFocus = true, width = 200, height = 100, htmlContent = null) {
   const id = 'n' + (++nodeCounter);
-  const t = nodeTypes[type];
+  const finalContent = htmlContent !== null ? htmlContent : (content || '');
 
-  const el = document.createElement('div');
-  el.className = `node type-${type}`;
-  el.id = id;
-  el.style.left = x + 'px';
-  el.style.top  = y + 'px';
-  el.style.width = width + 'px';
-  el.style.height = height + 'px';
-
-  // 如果有 htmlContent，使用它；否则使用纯文本 content
-  const finalContent = htmlContent !== null ? htmlContent : content;
-
-  el.innerHTML = `
-    <!-- 4边 Resize Line -->
-    <div class="node-resize-line top" data-dir="top"></div>
-    <div class="node-resize-line bottom" data-dir="bottom"></div>
-    <div class="node-resize-line left" data-dir="left"></div>
-    <div class="node-resize-line right" data-dir="right"></div>
-    <!-- 四角圆点 -->
-    <div class="node-resize-corner tl"></div>
-    <div class="node-resize-corner tr"></div>
-    <div class="node-resize-corner bl"></div>
-    <div class="node-resize-corner br" data-fit="true" title="双击自动适应内容"></div>
-
-    <!-- 连接点 -->
-    <div class="conn-handle right" data-side="right"></div>
-    <div class="conn-handle left" data-side="left"></div>
-    
-    <!-- 卡片主体 -->
-    <div class="node-card">
-      <!-- 输入区域 -->
-      <div class="node-card-content">
-        <!-- 文字格式工具栏 -->
-        <div class="format-toolbar" id="fmt-${id}">
-          <button class="fmt-bold" onmousedown="event.preventDefault(); applyFormat('${id}', 'bold')" title="加粗">B</button>
-          <button class="fmt-italic" onmousedown="event.preventDefault(); applyFormat('${id}', 'italic')" title="斜体">I</button>
-          <div class="sep"></div>
-          <button class="fmt-size-up" onmousedown="event.preventDefault(); applyFormat('${id}', 'sizeUp')" title="字号增大">A↑</button>
-          <button class="fmt-size-down" onmousedown="event.preventDefault(); applyFormat('${id}', 'sizeDown')" title="字号减小">A↓</button>
-        </div>
-        <div class="node-content" contenteditable="true" spellcheck="false" data-placeholder="输入你的 Prompt..." oninput="onNodeInput('${id}', this); autoGrowDiv(this);" onmouseup="checkSelection('${id}'); saveSelection('${id}')" onkeyup="checkSelection('${id}'); saveSelection('${id}')">${finalContent}</div>
-      </div>
-      
-      <!-- 底部 -->
-      <div class="node-card-footer">
-        <div class="node-flow-port" data-disabled="true"></div>
-        <div class="node-flow-trigger"></div>
-        <div class="node-footer-actions">
-          <button class="node-btn" title="问 AI" onclick="toggleAI('${id}')">▼</button>
-          <button class="node-btn danger" title="删除" onclick="deleteNode('${id}')">✕</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- AI 面板 -->
-    <div class="node-ai-bar" id="ai-bar-${id}">
-      <div class="ai-input-row">
-        <input class="ai-input" id="ai-input-${id}" placeholder="问 AI..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();askAI('${id}')}" />
-        <button class="ai-send-btn" onclick="askAI('${id}')">发送</button>
-      </div>
-      <div class="ai-response"></div>
-    </div>
-  `;
-
+  const el = buildNodeEl(id, type, x, y, width, height, finalContent);
   canvasLayer.appendChild(el);
   nodes[id] = { el, x, y, type, content: content || '' };
 
-  // 鼠标悬停显示底部选项
-  el.addEventListener('mouseenter', () => {
-    const card = el.querySelector('.node-card');
-    if (card) card.classList.add('hover');
-  });
-  el.addEventListener('mouseleave', () => {
-    const card = el.querySelector('.node-card');
-    if (card) card.classList.remove('hover');
-  });
+  el.addEventListener('mouseenter', () => el.querySelector('.node-card')?.classList.add('hover'));
+  el.addEventListener('mouseleave', () => el.querySelector('.node-card')?.classList.remove('hover'));
+  el.addEventListener('mousedown', (e) => { e.stopPropagation(); selectNode(id); });
 
   makeDraggable(el, id);
 
-  el.addEventListener('mousedown', (e) => {
-    e.stopPropagation();
-    selectNode(id);
-  });
-
-  // 节点大小调整 — 4边
+  // 4边 resize
   let resizing = false, resizeDir = '', rsx, rsy, rox, roy, rsw, rsh;
-  
   el.querySelectorAll('.node-resize-line').forEach(handle => {
     handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      resizing = true;
-      resizeDir = handle.dataset.dir;
+      e.preventDefault(); e.stopPropagation();
+      resizing = true; resizeDir = handle.dataset.dir;
       rsx = e.clientX; rsy = e.clientY;
       rox = nodes[id].x; roy = nodes[id].y;
       rsw = el.offsetWidth; rsh = el.offsetHeight;
       selectNode(id);
     });
   });
-
   window.addEventListener('mousemove', (e) => {
     if (!resizing) return;
     const dx = (e.clientX - rsx) / transform.scale;
     const dy = (e.clientY - rsy) / transform.scale;
-    
     const minW = 200, minH = 100;
     let newX = rox, newY = roy, newW = rsw, newH = rsh;
-    
-    if (resizeDir.includes('left')) {
-      newW = Math.max(minW, rsw - dx);
-      newX = rox + (rsw - newW);
-    }
-    if (resizeDir.includes('right')) {
-      newW = Math.max(minW, rsw + dx);
-    }
-    if (resizeDir.includes('top')) {
-      newH = Math.max(minH, rsh - dy);
-      newY = roy + (rsh - newH);
-    }
-    if (resizeDir.includes('bottom')) {
-      newH = Math.max(minH, rsh + dy);
-    }
-    
-    nodes[id].x = newX;
-    nodes[id].y = newY;
-    el.style.left = newX + 'px';
-    el.style.top = newY + 'px';
-    el.style.width = newW + 'px';
-    el.style.height = newH + 'px';
-    // 同步更新AI面板宽度
-    const aiBar = el.querySelector('.node-ai-bar');
-    if (aiBar) aiBar.style.width = newW + 'px';
+    if (resizeDir.includes('left'))   { newW = Math.max(minW, rsw - dx); newX = rox + (rsw - newW); }
+    if (resizeDir.includes('right'))    newW = Math.max(minW, rsw + dx);
+    if (resizeDir.includes('top'))    { newH = Math.max(minH, rsh - dy); newY = roy + (rsh - newH); }
+    if (resizeDir.includes('bottom'))   newH = Math.max(minH, rsh + dy);
+    nodes[id].x = newX; nodes[id].y = newY;
+    el.style.left = newX + 'px'; el.style.top = newY + 'px';
+    el.style.width = newW + 'px'; el.style.height = newH + 'px';
     drawConnections();
   });
+  window.addEventListener('mouseup', () => { if (resizing) { resizing = false; drawMinimap(); } });
 
-  window.addEventListener('mouseup', () => {
-    if (resizing) { resizing = false; drawMinimap(); }
-  });
-
-  // 节点大小调整 — 4角
+  // 4角 resize
   let cornerResizing = false, cornerDir = '', crsx, crsy, crox, croy, crsw, crsh;
-
   el.querySelectorAll('.node-resize-corner').forEach(handle => {
     handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       cornerResizing = true;
-      cornerDir = handle.className.includes('tl') ? 'tl' :
-                   handle.className.includes('tr') ? 'tr' :
-                   handle.className.includes('bl') ? 'bl' : 'br';
+      cornerDir = handle.classList.contains('tl') ? 'tl' :
+                  handle.classList.contains('tr') ? 'tr' :
+                  handle.classList.contains('bl') ? 'bl' : 'br';
       crsx = e.clientX; crsy = e.clientY;
       crox = nodes[id].x; croy = nodes[id].y;
       crsw = el.offsetWidth; crsh = el.offsetHeight;
       selectNode(id);
     });
   });
-
   window.addEventListener('mousemove', (e) => {
     if (!cornerResizing) return;
     const dx = (e.clientX - crsx) / transform.scale;
     const dy = (e.clientY - crsy) / transform.scale;
     const minW = 200, minH = 100;
     let newX = crox, newY = croy, newW = crsw, newH = crsh;
-
-    if (cornerDir === 'tl') {
-      newW = Math.max(minW, crsw - dx);
-      newH = Math.max(minH, crsh - dy);
-      newX = crox + (crsw - newW);
-      newY = croy + (crsh - newH);
-    } else if (cornerDir === 'tr') {
-      newW = Math.max(minW, crsw + dx);
-      newH = Math.max(minH, crsh - dy);
-      newY = croy + (crsh - newH);
-    } else if (cornerDir === 'bl') {
-      newW = Math.max(minW, crsw - dx);
-      newH = Math.max(minH, crsh + dy);
-      newX = crox + (crsw - newW);
-    } else if (cornerDir === 'br') {
-      newW = Math.max(minW, crsw + dx);
-      newH = Math.max(minH, crsh + dy);
-    }
-
-    nodes[id].x = newX;
-    nodes[id].y = newY;
-    el.style.left = newX + 'px';
-    el.style.top = newY + 'px';
-    el.style.width = newW + 'px';
-    el.style.height = newH + 'px';
-    // 同步更新AI面板宽度
-    const aiBar = el.querySelector('.node-ai-bar');
-    if (aiBar) aiBar.style.width = newW + 'px';
+    if (cornerDir === 'tl') { newW = Math.max(minW, crsw - dx); newH = Math.max(minH, crsh - dy); newX = crox + (crsw - newW); newY = croy + (crsh - newH); }
+    else if (cornerDir === 'tr') { newW = Math.max(minW, crsw + dx); newH = Math.max(minH, crsh - dy); newY = croy + (crsh - newH); }
+    else if (cornerDir === 'bl') { newW = Math.max(minW, crsw - dx); newH = Math.max(minH, crsh + dy); newX = crox + (crsw - newW); }
+    else if (cornerDir === 'br') { newW = Math.max(minW, crsw + dx); newH = Math.max(minH, crsh + dy); }
+    nodes[id].x = newX; nodes[id].y = newY;
+    el.style.left = newX + 'px'; el.style.top = newY + 'px';
+    el.style.width = newW + 'px'; el.style.height = newH + 'px';
     drawConnections();
   });
+  window.addEventListener('mouseup', () => { if (cornerResizing) { cornerResizing = false; drawMinimap(); } });
 
-  window.addEventListener('mouseup', () => {
-    if (cornerResizing) { cornerResizing = false; drawMinimap(); }
-  });
-
-  // 右下角双击自动适应内容
   const fitHandle = el.querySelector('.node-resize-corner.br[data-fit="true"]');
-  if (fitHandle) {
-    fitHandle.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      fitNodeToContent(id);
-    });
-  }
+  if (fitHandle) fitHandle.addEventListener('dblclick', (e) => { e.stopPropagation(); fitNodeToContent(id); });
 
-  if (autoFocus) {
-    setTimeout(() => {
-      const ta = el.querySelector('.node-content');
-      ta.focus();
-    }, 50);
-  }
+  if (autoFocus) setTimeout(() => el.querySelector('.node-content')?.focus(), 50);
 
   drawMinimap();
   return id;
 }
 
-// 自动适应内容调整节点大小（紧凑版）
 function fitNodeToContent(nodeId) {
   const nd = nodes[nodeId];
   if (!nd) return;
   const el = nd.el;
   const textarea = el.querySelector('.node-content');
-  const card = el.querySelector('.node-card');
-  
-  if (!textarea || !card) return;
-
-  // 获取textarea的实际滚动高度（已包含padding）
+  const footer = el.querySelector('.node-card-footer');
+  if (!textarea) return;
   textarea.style.height = 'auto';
   const contentH = textarea.scrollHeight;
   textarea.style.height = contentH + 'px';
-
-  // 获取footer高度
-  const footer = el.querySelector('.node-card-footer');
   const footerH = footer ? footer.offsetHeight : 0;
-  
-  // scrollHeight已包含textarea的padding(上下16px)，直接用它
-  const minWidth = 200;
-  const minHeight = 50;
-  
-  // 宽度：取 textarea 实际宽度
-  const newWidth = Math.max(minWidth, Math.min(textarea.scrollWidth, 600));
-  // 高度：scrollHeight（内容+padding） + footer
-  const newHeight = Math.max(minHeight, contentH + footerH);
-
+  const newWidth  = Math.max(200, Math.min(textarea.scrollWidth, 600));
+  const newHeight = Math.max(50, contentH + footerH);
   el.style.width = newWidth + 'px';
   el.style.height = newHeight + 'px';
-  
-  // 同步更新AI面板宽度
-  const aiBar = el.querySelector('.node-ai-bar');
-  if (aiBar) aiBar.style.width = newWidth + 'px';
-  
-  drawConnections();
-  drawMinimap();
+  drawConnections(); drawMinimap();
   toast('已适应内容调整大小');
 }
 
-// 全选所有节点
-function selectAllNodes() {
-  const ids = Object.keys(nodes);
-  if (ids.length === 0) {
-    toast('画布上没有节点');
-    return;
-  }
-  // 取消之前的选中
-  Object.values(nodes).forEach(n => n.el.classList.remove('selected'));
-  // 选中所有节点
-  ids.forEach(id => {
-    nodes[id].el.classList.add('selected');
-  });
-  selectedNodes = ids;
-  toast(`已选中 ${ids.length} 个节点`);
-}
-
-// 取消全选
 function deselectAll() {
   Object.values(nodes).forEach(n => n.el.classList.remove('selected'));
   selectedNodes = [];
@@ -1587,13 +1167,10 @@ function deleteNode(id) {
   nodes[id].el.remove();
   delete nodes[id];
   connections = connections.filter(c => c.from !== id && c.to !== id);
-  // 从选中数组中移除
   selectedNodes = selectedNodes.filter(sid => sid !== id);
-  drawConnections();
-  drawMinimap();
+  drawConnections(); drawMinimap();
 }
 
-// 批量删除选中的节点
 function deleteSelectedNodes() {
   if (selectedNodes.length === 0) return;
   saveState();
@@ -1605,20 +1182,14 @@ function deleteSelectedNodes() {
     }
   });
   selectedNodes = [];
-  drawConnections();
-  drawMinimap();
+  drawConnections(); drawMinimap();
 }
 
-// 选择节点（支持多选）
 function selectNode(id, addToSelection = false) {
   if (!addToSelection) {
-    // 非追加模式：清除所有选中
-    selectedNodes.forEach(sid => {
-      document.getElementById(sid)?.classList.remove('selected');
-    });
+    selectedNodes.forEach(sid => document.getElementById(sid)?.classList.remove('selected'));
     selectedNodes = [];
   }
-  // 添加新选中
   if (id && !selectedNodes.includes(id)) {
     selectedNodes.push(id);
     document.getElementById(id)?.classList.add('selected');
@@ -1629,245 +1200,78 @@ function onNodeInput(id, el) {
   if (nodes[id]) nodes[id].content = el.innerText;
 }
 
-// 检查选中文本，显示格式工具栏
+// ════════════════════════════════════════════
+//  FORMAT TOOLBAR
+// ════════════════════════════════════════════
 function checkSelection(nodeId) {
   const el = document.getElementById(nodeId);
   if (!el) return;
-  const div = el.querySelector('.node-content');
   const toolbar = el.querySelector('.format-toolbar');
-  if (!div || !toolbar) return;
-  
+  if (!toolbar) return;
   const sel = window.getSelection();
   if (sel.rangeCount > 0 && sel.toString().length > 0) {
     toolbar.classList.add('visible');
-    // 更新按钮状态
     updateFormatButtonStates(toolbar);
   } else {
     toolbar.classList.remove('visible');
   }
 }
 
-// 保存选区到变量（兼容 contenteditable）
-const _savedSelection = {};
-function saveSelection(nodeId) {
-  const el = document.getElementById(nodeId);
-  if (!el) return;
-  const div = el.querySelector('.node-content');
-  if (!div) return;
-  
+const _savedRanges = {};
+function saveSelectionRange(nodeId) {
   const sel = window.getSelection();
-  if (sel.rangeCount > 0) {
-    const range = sel.getRangeAt(0);
-    _savedSelection[nodeId] = {
-      start: range.startOffset,
-      end: range.endOffset,
-      startContainer: range.startContainer,
-      endContainer: range.endContainer
-    };
-  }
+  if (sel.rangeCount > 0) _savedRanges[nodeId] = sel.getRangeAt(0).cloneRange();
 }
 
-// 隐藏格式工具栏
-function hideFormatToolbar(nodeId) {
-  const el = document.getElementById(nodeId);
-  if (!el) return;
-  const toolbar = el.querySelector('.format-toolbar');
-  if (toolbar) {
-    // 延迟隐藏，等待 applyFormat 完成
-    setTimeout(() => {
-      if (!toolbar.contains(document.activeElement)) {
-        toolbar.classList.remove('visible');
-      }
-    }, 100);
-  }
-}
-
-// 全局点击检测 - 点击工具栏外部时隐藏
 document.addEventListener('mousedown', (e) => {
   if (e.target.closest('.format-toolbar')) return;
-  document.querySelectorAll('.format-toolbar.visible').forEach(toolbar => {
-    // 检查当前活动的 textarea
-    const activeEl = document.activeElement;
-    if (!activeEl || !activeEl.classList.contains('node-content')) {
-      toolbar.classList.remove('visible');
-    }
+  document.querySelectorAll('.format-toolbar.visible').forEach(tb => {
+    if (!document.activeElement?.classList.contains('node-content')) tb.classList.remove('visible');
   });
 });
 
-// 更新格式按钮状态（富文本模式）
+window.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.node')) return;
+  document.querySelectorAll('.format-toolbar.visible').forEach(tb => tb.classList.remove('visible'));
+});
+
 function updateFormatButtonStates(toolbar) {
   const boldBtn = toolbar.querySelector('.fmt-bold');
   const italicBtn = toolbar.querySelector('.fmt-italic');
-  
-  // 使用 queryCommandState 检测富文本格式
-  if (boldBtn) {
-    boldBtn.classList.toggle('active', document.queryCommandState('bold'));
-  }
-  if (italicBtn) {
-    italicBtn.classList.toggle('active', document.queryCommandState('italic'));
-  }
+  if (boldBtn) boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+  if (italicBtn) italicBtn.classList.toggle('active', document.queryCommandState('italic'));
 }
 
-// 保存当前节点的选区
-let savedSelection = null;
-let savedNodeId = null;
-
-function saveSelectionForFormat(nodeId) {
-  const sel = window.getSelection();
-  if (sel.rangeCount > 0 && sel.toString().length > 0) {
-    savedSelection = sel.getRangeAt(0).cloneRange();
-    savedNodeId = nodeId;
-  }
-}
-
-// 字号按钮处理
-function fmtSizeBtn(e, nodeId, delta) {
-  e.preventDefault();
-  e.stopPropagation();
-  
+function applyFormat(nodeId, type) {
   const el = document.getElementById(nodeId);
   if (!el) return;
   const div = el.querySelector('.node-content');
   if (!div) return;
-  
-  // 检查是否有有效选区
-  const sel = window.getSelection();
-  if (!sel.rangeCount || sel.toString().length === 0) {
-    return;
-  }
-  
-  const range = sel.getRangeAt(0);
-  const selectedText = sel.toString();
-  
-  // 应用字号变化到选中文本
-  const currentSize = 16;
-  const newSize = delta > 0 ? currentSize + 2 : Math.max(10, currentSize - 2);
-  
-  // 用 span 包装选中文本
-  const span = document.createElement('span');
-  span.style.fontSize = newSize + 'px';
-  span.textContent = selectedText;
-  
-  try {
-    range.deleteContents();
-    range.insertNode(span);
-  } catch (e) {
-    return;
-  }
-  
-  // 选中新添加的 span
   div.focus();
-  const newRange = document.createRange();
-  newRange.selectNodeContents(div);
-  newRange.collapse(false);
-  sel.removeAllRanges();
-  sel.addRange(newRange);
-}
-
-// 直接应用格式（用于 select onclick）
-function applyFormatDirect(nodeId, type, selectEl) {
-  const value = selectEl.value;
-  if (!value) return;
-  
-  const el = document.getElementById(nodeId);
-  if (!el) return;
-  const div = el.querySelector('.node-content');
-  if (!div) return;
-  
-  div.focus();
-  
-  // 恢复保存的选区
-  let range = null;
-  if (savedSelection) {
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(savedSelection);
-    range = savedSelection;
-  } else if (window.getSelection().rangeCount > 0) {
-    range = window.getSelection().getRangeAt(0);
-  }
-  
-  if (type === 'fontSize' && value) {
-    if (range && !range.collapsed) {
-      try {
-        const span = document.createElement('span');
-        span.style.fontSize = value;
-        range.surroundContents(span);
-      } catch (e) {
-        const fragment = range.extractContents();
-        const span = document.createElement('span');
-        span.style.fontSize = value;
-        span.appendChild(fragment);
-        range.insertNode(span);
-      }
-    }
-  } else if (type === 'fontFamily' && value) {
-    if (range && !range.collapsed) {
-      try {
-        const span = document.createElement('span');
-        span.style.fontFamily = value;
-        range.surroundContents(span);
-      } catch (e) {
-        const fragment = range.extractContents();
-        const span = document.createElement('span');
-        span.style.fontFamily = value;
-        span.appendChild(fragment);
-        range.insertNode(span);
-      }
-    } else {
-      div.style.fontFamily = value;
-    }
-  }
-  
-  savedSelection = null;
-  selectEl.value = '';
-}
-
-// 应用格式（富文本模式）
-function applyFormat(nodeId, type, value) {
-  const el = document.getElementById(nodeId);
-  if (!el) return;
-  const div = el.querySelector('.node-content');
-  if (!div) return;
-  
-  // 先聚焦 div
-  div.focus();
-  
   if (type === 'bold') {
     document.execCommand('bold', false, null);
   } else if (type === 'italic') {
     document.execCommand('italic', false, null);
   } else if (type === 'sizeUp' || type === 'sizeDown') {
-    // 字体变大/变小
     const sel = window.getSelection();
     if (!sel.rangeCount || sel.toString().length === 0) return;
-    
     const range = sel.getRangeAt(0);
     const selectedText = sel.toString();
-    
-    // 获取当前字号
     let currentSize = 16;
     let targetSpan = null;
     let parent = range.commonAncestorContainer;
-    
-    // 找到已有字号样式的span
     while (parent && parent !== div) {
-      if (parent.nodeType === 1 && parent.style.fontSize) {
+      if (parent.nodeType === 1 && parent.style?.fontSize) {
         currentSize = parseInt(parent.style.fontSize) || 16;
-        targetSpan = parent;
-        break;
+        targetSpan = parent; break;
       }
       parent = parent.parentNode;
     }
-    
     const newSize = type === 'sizeUp' ? currentSize + 2 : Math.max(10, currentSize - 2);
-    
     try {
       if (targetSpan) {
-        // 已有span，直接更新字号
         targetSpan.style.fontSize = newSize + 'px';
       } else {
-        // 新建span包装
         const span = document.createElement('span');
         span.style.fontSize = newSize + 'px';
         span.textContent = selectedText;
@@ -1875,72 +1279,12 @@ function applyFormat(nodeId, type, value) {
         range.insertNode(span);
         targetSpan = span;
       }
-      
-      // 保持选区（选中文本内容，不选标签）
-      div.focus();
       const newRange = document.createRange();
       newRange.selectNodeContents(targetSpan);
       sel.removeAllRanges();
       sel.addRange(newRange);
-    } catch (e) {}
-  } else if (type === 'fontSize' && value) {
-    // 使用保存的选区或当前选区
-    let range = null;
-    if (savedSelection) {
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(savedSelection);
-      range = savedSelection;
-    } else if (window.getSelection().rangeCount > 0) {
-      range = window.getSelection().getRangeAt(0);
-    }
-    
-    if (range && !range.collapsed) {
-      try {
-        const span = document.createElement('span');
-        span.style.fontSize = value;
-        range.surroundContents(span);
-      } catch (e) {
-        // 如果选区跨越多个元素，使用 wrapper 方法
-        const fragment = range.extractContents();
-        const span = document.createElement('span');
-        span.style.fontSize = value;
-        span.appendChild(fragment);
-        range.insertNode(span);
-      }
-    }
-    savedSelection = null;
-  } else if (type === 'fontFamily' && value) {
-    // 对选中文字应用字体，或应用到整个内容区
-    let range = null;
-    if (savedSelection) {
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(savedSelection);
-      range = savedSelection;
-    } else if (window.getSelection().rangeCount > 0) {
-      range = window.getSelection().getRangeAt(0);
-    }
-    
-    if (range && !range.collapsed) {
-      try {
-        const span = document.createElement('span');
-        span.style.fontFamily = value;
-        range.surroundContents(span);
-      } catch (e) {
-        const fragment = range.extractContents();
-        const span = document.createElement('span');
-        span.style.fontFamily = value;
-        span.appendChild(fragment);
-        range.insertNode(span);
-      }
-    } else {
-      // 无选区时应用到整个内容
-      div.style.fontFamily = value;
-    }
-    savedSelection = null;
+    } catch(e) {}
   }
-  
   onNodeInput(nodeId, div);
 }
 
@@ -1948,11 +1292,11 @@ function applyFormat(nodeId, type, value) {
 //  DRAG NODES
 // ════════════════════════════════════════════
 function makeDraggable(el, id) {
-  let dragging = false, sx, sy, ox, oy;
+  let dragging = false, sx, sy;
+  let dragOffsets = [];
 
   el.addEventListener('mousedown', (e) => {
-    // 忽略按钮、输入框、resize控制和连接点的点击
-    if (e.target.closest('.node-btn') || 
+    if (e.target.closest('.node-btn') ||
         e.target.closest('.node-content') ||
         e.target.closest('.ai-input') ||
         e.target.closest('.node-resize-line') ||
@@ -1961,64 +1305,43 @@ function makeDraggable(el, id) {
         e.target.tagName === 'TEXTAREA' ||
         e.target.tagName === 'INPUT') return;
     e.preventDefault();
-    
     dragging = true;
     sx = e.clientX; sy = e.clientY;
-    ox = nodes[id].x; oy = nodes[id].y;
-    
-    // 如果当前节点不在选中列表中，则重新选择它
-    if (!selectedNodes.includes(id)) {
-      selectNode(id);
-    }
-    
-    // 记录所有选中节点的原始位置（用于多选移动）
-    dragOffsets = selectedNodes.map(sid => ({
-      id: sid,
-      ox: nodes[sid].x,
-      oy: nodes[sid].y
-    }));
-    
+    if (!selectedNodes.includes(id)) selectNode(id);
+    dragOffsets = selectedNodes.map(sid => ({ id: sid, ox: nodes[sid].x, oy: nodes[sid].y }));
     el.classList.add('dragging');
     document.body.style.cursor = 'grabbing';
   });
-
-  // 存储多选拖拽的偏移量
-  let dragOffsets = [];
 
   window.addEventListener('mousemove', (e) => {
     if (!dragging) return;
     const dx = (e.clientX - sx) / transform.scale;
     const dy = (e.clientY - sy) / transform.scale;
-    
-    // 移动所有选中的节点
     dragOffsets.forEach(offset => {
       if (nodes[offset.id]) {
         nodes[offset.id].x = offset.ox + dx;
         nodes[offset.id].y = offset.oy + dy;
         nodes[offset.id].el.style.left = nodes[offset.id].x + 'px';
-        nodes[offset.id].el.style.top = nodes[offset.id].y + 'px';
+        nodes[offset.id].el.style.top  = nodes[offset.id].y + 'px';
       }
     });
-    drawConnections(); // 拖动时实时更新连线
+    drawConnections();
   });
 
   window.addEventListener('mouseup', () => {
-    if (dragging) { 
-      dragging = false; 
-      dragOffsets = [];
-      document.body.style.cursor = ''; 
+    if (dragging) {
+      dragging = false; dragOffsets = [];
+      document.body.style.cursor = '';
       el.classList.remove('dragging');
-      drawMinimap(); 
+      drawMinimap();
     }
   });
 
-  // ── 连接点事件 ──
+  // 连接点
   el.querySelectorAll('.conn-handle').forEach(handle => {
     handle.addEventListener('mousedown', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const nd = nodes[id];
-      if (!nd) return;
+      e.stopPropagation(); e.preventDefault();
+      const nd = nodes[id]; if (!nd) return;
       const side = handle.dataset.side;
       const fromX = side === 'right' ? nd.x + el.offsetWidth : nd.x;
       const fromY = nd.y + el.offsetHeight / 2;
@@ -2028,37 +1351,29 @@ function makeDraggable(el, id) {
 }
 
 // ════════════════════════════════════════════
-//  NODE CONNECTIONS
+//  CONNECTIONS
 // ════════════════════════════════════════════
+let _conn_fromId = null;
+let _hoverTargetId = null;
 
-function getCanvasPos(clientX, clientY) {
-  const rect = canvasEl.getBoundingClientRect();
-  return {
-    x: (clientX - rect.left - transform.x) / transform.scale,
-    y: (clientY - rect.top  - transform.y) / transform.scale
-  };
+function startConnection(fromId, fromX, fromY) {
+  _conn_fromId = fromId;
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', '#F79E58');
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('stroke-dasharray', '6,3');
+  path.setAttribute('opacity', '0.85');
+  path.setAttribute('pointer-events', 'none');
+  svgLayer.appendChild(path);
+  _conn = { fromX, fromY, path };
+  path.setAttribute('d', `M${fromX},${fromY} L${fromX},${fromY}`);
 }
 
-// 全局 mousedown：点击非节点区域时隐藏格式工具栏
-window.addEventListener('mousedown', (e) => {
-  const target = e.target;
-  // 如果点击的是节点内的 contenteditable 或 format-toolbar，不处理
-  if (target.closest('.node')) return;
-  // 隐藏所有格式工具栏
-  document.querySelectorAll('.format-toolbar.visible').forEach(tb => {
-    tb.classList.remove('visible');
-  });
-});
-
-// 全局 mousemove：连线过程中更新线条 + 目标高亮
-let _hoverTargetId = null;
 window.addEventListener('mousemove', (e) => {
   if (!_conn) return;
-  const pos = getCanvasPos(e.clientX, e.clientY);
-  const fx = _conn.fromX, fy = _conn.fromY;
-  _conn.path.setAttribute('d', `M${fx},${fy} L${pos.x},${pos.y}`);
-
-  // 用 elementFromPoint 穿透 SVG 层检测下方节点
+  const pos = screenToCanvas(e.clientX, e.clientY);
+  _conn.path.setAttribute('d', `M${_conn.fromX},${_conn.fromY} L${pos.x},${pos.y}`);
   const el = document.elementFromPoint(e.clientX, e.clientY);
   const targetNode = el ? el.closest('.node') : null;
   if (targetNode && targetNode.id !== _conn_fromId) {
@@ -2075,74 +1390,34 @@ window.addEventListener('mousemove', (e) => {
   }
 });
 
-// 保存 fromId（mouseup 闭包问题）
-let _conn_fromId = null;
-
-function startConnection(fromId, fromX, fromY) {
-  _conn_fromId = fromId;
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('fill', 'none');
-  path.setAttribute('stroke', '#F79E58');
-  path.setAttribute('stroke-width', '2');
-  path.setAttribute('stroke-dasharray', '6,3');
-  path.setAttribute('opacity', '0.85');
-  path.setAttribute('pointer-events', 'none');
-  svgLayer.appendChild(path);
-  _conn = { fromX, fromY, path };
-  path.setAttribute('d', `M${fromX},${fromY} L${fromX},${fromY}`);
-}
-
-// 全局 mouseup：完成或取消连线
-window.addEventListener('mouseup', (e) => {
+window.addEventListener('mouseup', () => {
   if (!_conn) return;
   const toId = _hoverTargetId;
-
   _conn.path.remove();
   document.querySelectorAll('.node.conn-target').forEach(n => n.classList.remove('conn-target'));
   _hoverTargetId = null;
   _conn = null;
-
-  if (toId) {
-    addConnection(_conn_fromId, toId);
-  }
+  if (toId) addConnection(_conn_fromId, toId);
 });
-
-function toggleConnectMode() {
-  const btn = document.getElementById('connect-btn');
-  btn.classList.toggle('active');
-  const isActive = btn.classList.contains('active');
-  if (isActive) toast('连线模式：请点击节点右侧的圆点，拖拽到目标节点');
-  else toast('已退出连线模式');
-}
 
 function addConnection(from, to) {
   if (!from || !to || from === to) return;
-  if (connections.find(c => c.from === from && c.to === to)) {
-    toast('该连线已存在');
-    return;
-  }
+  if (connections.find(c => c.from === from && c.to === to)) { toast('该连线已存在'); return; }
   connections.push({ from, to });
-  drawConnections();
-  drawMinimap();
+  drawConnections(); drawMinimap();
   toast('连线已创建');
 }
 
 function drawConnections() {
   const defs = svgLayer.querySelector('defs');
   defs.innerHTML = '';
-  const existingPaths = svgLayer.querySelectorAll('path:not([pointer-events="none"])');
-  existingPaths.forEach(p => p.remove());
-
+  svgLayer.querySelectorAll('path:not([pointer-events="none"])').forEach(p => p.remove());
   connections.forEach(c => {
     const fn = nodes[c.from], tn = nodes[c.to];
     if (!fn || !tn) return;
-    const fEl = fn.el, tEl = tn.el;
-    const fx = fn.x + fEl.offsetWidth;
-    const fy = fn.y + fEl.offsetHeight / 2;
-    const tx = tn.x;
-    const ty = tn.y + tEl.offsetHeight / 2;
+    const fx = fn.x + fn.el.offsetWidth, fy = fn.y + fn.el.offsetHeight / 2;
+    const tx = tn.x, ty = tn.y + tn.el.offsetHeight / 2;
     const cpX = fx + 40;
-
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', `M${fx},${fy} C${cpX},${fy} ${cpX},${ty} ${tx},${ty}`);
     path.setAttribute('fill', 'none');
@@ -2154,9 +1429,10 @@ function drawConnections() {
 }
 
 // ════════════════════════════════════════════
+//  AI (NODE LEVEL)
+// ════════════════════════════════════════════
 function toggleAI(nodeId) {
-  const nd = nodes[nodeId];
-  if (!nd) return;
+  const nd = nodes[nodeId]; if (!nd) return;
   const bar = nd.el.querySelector('.node-ai-bar');
   if (bar.classList.contains('open')) {
     bar.classList.remove('open');
@@ -2164,24 +1440,19 @@ function toggleAI(nodeId) {
   } else {
     bar.classList.add('open');
     nd.el.classList.add('ai-open');
-    // Auto-focus the input
     setTimeout(() => nd.el.querySelector('.ai-input')?.focus(), 50);
   }
 }
 
 async function askAI(nodeId) {
-  const nd = nodes[nodeId];
-  if (!nd) return;
+  const nd = nodes[nodeId]; if (!nd) return;
   const inputEl = nd.el.querySelector('.ai-input');
   const btn = nd.el.querySelector('.ai-send-btn');
   const question = inputEl.value.trim();
   if (!question) return;
-
   const nodeContent = nd.el.querySelector('.node-content').innerText;
   inputEl.value = '';
   btn.disabled = true;
-
-  // show response area
   let respEl = nd.el.querySelector('.ai-response');
   if (!respEl) {
     respEl = document.createElement('div');
@@ -2190,10 +1461,7 @@ async function askAI(nodeId) {
   }
   respEl.className = 'ai-response loading';
   respEl.textContent = '⏳ AI 思考中...';
-
-  const context = nodeContent ? `节点内容：${nodeContent}\n\n` : '';
-  const prompt = context + question;
-
+  const prompt = (nodeContent ? `节点内容：${nodeContent}\n\n` : '') + question;
   try {
     const answer = await callAI(prompt);
     respEl.className = 'ai-response';
@@ -2202,33 +1470,23 @@ async function askAI(nodeId) {
     respEl.className = 'ai-response error';
     respEl.textContent = '⚠️ ' + err.message;
   }
-
   btn.disabled = false;
   drawMinimap();
 }
 
-
 async function aiExpandNode(nodeId) {
-  const nd = nodes[nodeId];
-  if (!nd) return;
+  const nd = nodes[nodeId]; if (!nd) return;
   const content = nd.el.querySelector('.node-content').innerText;
   if (!content.trim()) { toast('请先在节点中输入内容'); return; }
-
-  const x = nd.x + 360;
-  const baseY = nd.y - 80;
-
+  const x = nd.x + 360, baseY = nd.y - 80;
   toast('AI 正在展开想法...');
   try {
     saveState();
     const answer = await callAI(`请将以下想法展开成3个子想法或关联概念（每个用一句话，用换行分隔，直接输出内容，不要编号）：\n\n${content}`);
     const lines = answer.split('\n').filter(l => l.trim());
-    lines.slice(0, 3).forEach((line, i) => {
-      createNode('idea', x, baseY + i * 160, line.trim(), false);
-    });
+    lines.slice(0, 3).forEach((line, i) => createNode('idea', x, baseY + i * 160, line.trim(), false));
     toast('已展开 ' + Math.min(lines.length, 3) + ' 个子想法');
-  } catch(e) {
-    toast('AI 响应失败：' + e.message);
-  }
+  } catch(e) { toast('AI 响应失败：' + e.message); }
 }
 
 async function aiSummaryAll() {
@@ -2236,154 +1494,88 @@ async function aiSummaryAll() {
     .map(n => n.el.querySelector('.node-content').innerText)
     .filter(c => c.trim());
   if (!allContent.length) { toast('画布上还没有内容'); return; }
-
   toast('AI 正在生成总结...');
   try {
     saveState();
     const answer = await callAI(`请将以下多个想法/节点内容进行整合总结，输出一段简洁的综合洞察（200字以内）：\n\n${allContent.join('\n\n')}`);
     const cx = (canvasEl.clientWidth / 2 - transform.x) / transform.scale;
     const cy = (canvasEl.clientHeight / 2 - transform.y) / transform.scale + 200;
-    createNode('summary', cx - 160, cy, answer, false);
+    createNode('idea', cx - 160, cy, answer, false);
     toast('总结节点已生成');
-  } catch(e) {
-    toast('AI 响应失败：' + e.message);
-  }
+  } catch(e) { toast('AI 响应失败：' + e.message); }
 }
 
 // ════════════════════════════════════════════
-//  CONTEXT MENU ACTIONS
+//  CONTEXT MENU
 // ════════════════════════════════════════════
 function ctxAction(type) {
   ctxMenu.style.display = 'none';
-  if (['idea','summary','question','action'].includes(type)) {
-    saveState();
-    createNode(type, ctxPos.x, ctxPos.y, '');
-  } else if (type === 'copy') {
-    copySelectedNodes();
-  } else if (type === 'paste') {
-    pasteNodes();
-  } else if (type === 'ai-expand') {
-    if (selectedNodes.length > 0) aiExpandNode(selectedNodes[0]);
-    else toast('请先选中一个节点');
-  } else if (type === 'ai-summary') {
-    aiSummaryAll();
-  } else if (type === 'delete') {
-    deleteSelectedNodes();
-  }
+  if (type === 'idea') { saveState(); createNode('idea', ctxPos.x, ctxPos.y, ''); }
+  else if (type === 'copy') copySelectedNodes();
+  else if (type === 'paste') pasteNodes();
+  else if (type === 'ai-expand') { if (selectedNodes.length > 0) aiExpandNode(selectedNodes[0]); else toast('请先选中一个节点'); }
+  else if (type === 'ai-summary') aiSummaryAll();
+  else if (type === 'delete') deleteSelectedNodes();
 }
 
-// ════════════════════════════════════════════
-//  AUTO LAYOUT
-// ════════════════════════════════════════════
 function autoLayout() {
-  const ids = Object.keys(nodes);
-  if (!ids.length) return;
+  const ids = Object.keys(nodes); if (!ids.length) return;
   const cols = Math.ceil(Math.sqrt(ids.length));
   const W = 340, H = 220;
   ids.forEach((id, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    nodes[id].x = 60 + col * W;
-    nodes[id].y = 60 + row * H;
+    const col = i % cols, row = Math.floor(i / cols);
+    nodes[id].x = 60 + col * W; nodes[id].y = 60 + row * H;
     nodes[id].el.style.left = nodes[id].x + 'px';
     nodes[id].el.style.top  = nodes[id].y + 'px';
   });
-  drawConnections();
-  drawMinimap();
-  toast('布局已整理');
+  drawConnections(); drawMinimap(); toast('布局已整理');
 }
 
 function clearAll() {
   if (!confirm('确定清空画布吗？')) return;
   saveState();
   Object.keys(nodes).forEach(id => nodes[id].el.remove());
-  nodes = {};
-  connections = [];
+  nodes = {}; connections = [];
   svgLayer.innerHTML = '<defs></defs>';
-  nodeCounter = 0;
-  selectedNodes = [];
+  nodeCounter = 0; selectedNodes = [];
   drawMinimap();
 }
 
 // ════════════════════════════════════════════
 //  MINIMAP
 // ════════════════════════════════════════════
-//  MINIMAP — React Flow 风格
-// ════════════════════════════════════════════
 function drawMinimap() {
-  const cvs = document.getElementById('minimap-canvas2');
-  if (!cvs) return;
+  const cvs = document.getElementById('minimap-canvas2'); if (!cvs) return;
   const ctx = cvs.getContext('2d');
-  const W = cvs.width = 200;
-  const H = cvs.height = 150;
-  
+  const W = cvs.width = 200, H = cvs.height = 150;
   ctx.clearRect(0, 0, W, H);
-  
-  // 背景
-  ctx.fillStyle = '#FAF9F6';
-  ctx.fillRect(0, 0, W, H);
-
-  const ids = Object.keys(nodes);
-  if (!ids.length) return;
-
-  // 计算所有节点边界
+  ctx.fillStyle = '#FAF9F6'; ctx.fillRect(0, 0, W, H);
+  const ids = Object.keys(nodes); if (!ids.length) return;
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   ids.forEach(id => {
     const n = nodes[id];
-    const el = n.el;
-    minX = Math.min(minX, n.x);
-    minY = Math.min(minY, n.y);
-    maxX = Math.max(maxX, n.x + el.offsetWidth);
-    maxY = Math.max(maxY, n.y + el.offsetHeight);
+    minX = Math.min(minX, n.x); minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + n.el.offsetWidth);
+    maxY = Math.max(maxY, n.y + n.el.offsetHeight);
   });
-
-  // 扩展边界以包含视口
-  const vpLeft = -transform.x / transform.scale;
-  const vpTop = -transform.y / transform.scale;
-  const vpW = canvasEl.clientWidth / transform.scale;
-  const vpH = canvasEl.clientHeight / transform.scale;
-  minX = Math.min(minX, vpLeft);
-  minY = Math.min(minY, vpTop);
-  maxX = Math.max(maxX, vpLeft + vpW);
-  maxY = Math.max(maxY, vpTop + vpH);
-
+  const vpLeft = -transform.x / transform.scale, vpTop = -transform.y / transform.scale;
+  const vpW = canvasEl.clientWidth / transform.scale, vpH = canvasEl.clientHeight / transform.scale;
+  minX = Math.min(minX, vpLeft); minY = Math.min(minY, vpTop);
+  maxX = Math.max(maxX, vpLeft + vpW); maxY = Math.max(maxY, vpTop + vpH);
   const pw = maxX - minX + 200, ph = maxY - minY + 200;
-  const sx = W / pw, sy = H / ph;
-  const s = Math.min(sx, sy, 1);
-
-  // 居中偏移
+  const s = Math.min(W / pw, H / ph, 1);
   const offsetX = (W - (maxX - minX) * s) / 2;
   const offsetY = (H - (maxY - minY) * s) / 2;
-
-  // 绘制节点
   ids.forEach(id => {
     const n = nodes[id];
-    const el = n.el;
-    const isSelected = el.classList.contains('selected');
-    
-    const nx = (n.x - minX) * s + offsetX;
-    const ny = (n.y - minY) * s + offsetY;
-    const nw = Math.max(20, el.offsetWidth * s);
-    const nh = Math.max(10, el.offsetHeight * s);
-
-    // 节点颜色：选中为橙色，否则灰色
-    ctx.fillStyle = isSelected ? '#F79E58' : '#E5E7EB';
-    ctx.beginPath();
-    ctx.roundRect(nx, ny, nw, nh, 4);
-    ctx.fill();
+    const nx = (n.x - minX) * s + offsetX, ny = (n.y - minY) * s + offsetY;
+    const nw = Math.max(20, n.el.offsetWidth * s), nh = Math.max(10, n.el.offsetHeight * s);
+    ctx.fillStyle = n.el.classList.contains('selected') ? '#F79E58' : '#E5E7EB';
+    ctx.beginPath(); ctx.roundRect(nx, ny, nw, nh, 4); ctx.fill();
   });
-
-  // 绘制视口框
-  const vx = (vpLeft - minX) * s + offsetX;
-  const vy = (vpTop - minY) * s + offsetY;
-  const vw = vpW * s;
-  const vh = vpH * s;
-
-  ctx.strokeStyle = '#F79E58';
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([4, 4]);
-  ctx.strokeRect(vx, vy, vw, vh);
-  ctx.setLineDash([]);
+  const vx = (vpLeft - minX) * s + offsetX, vy = (vpTop - minY) * s + offsetY;
+  ctx.strokeStyle = '#F79E58'; ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]); ctx.strokeRect(vx, vy, vpW * s, vpH * s); ctx.setLineDash([]);
 }
 
 // ════════════════════════════════════════════
@@ -2392,8 +1584,7 @@ function drawMinimap() {
 let toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.textContent = msg; el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
@@ -2402,33 +1593,22 @@ function toast(msg) {
 //  KEYBOARD SHORTCUTS
 // ════════════════════════════════════════════
 window.addEventListener('keydown', (e) => {
-  // 排除输入框、textarea 和 contenteditable 编辑区域
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (e.target.isContentEditable) return;
   if (e.key === ' ') { e.preventDefault(); spaceDown = true; }
-  if (e.key === 'Delete') {
-    deleteSelectedNodes();
-  }
-  // Ctrl+C 复制
-  if (e.ctrlKey && e.key === 'c') {
-    copySelectedNodes();
-  }
-  // Ctrl+V 粘贴
-  if (e.ctrlKey && e.key === 'v') {
-    pasteNodes();
-  }
+  if (e.key === 'Delete') deleteSelectedNodes();
+  if (e.ctrlKey && e.key === 'c') copySelectedNodes();
+  if (e.ctrlKey && e.key === 'v') pasteNodes();
 });
 window.addEventListener('keyup', (e) => { if (e.key === ' ') spaceDown = false; });
 
 // ════════════════════════════════════════════
-//  RIGHT CHAT PANEL
+//  CHAT PANEL
 // ════════════════════════════════════════════
 function toggleChatPanel() {
   chatPanelOpen = !chatPanelOpen;
   document.getElementById('chat-panel').classList.toggle('open', chatPanelOpen);
-  if (chatPanelOpen) {
-    setTimeout(() => document.getElementById('chat-input')?.focus(), 300);
-  }
+  if (chatPanelOpen) setTimeout(() => document.getElementById('chat-input')?.focus(), 300);
 }
 
 function autoGrow(el) {
@@ -2446,7 +1626,7 @@ function appendChatMsg(role, text, isHtml = false) {
   const div = document.createElement('div');
   div.className = `chat-msg ${role === 'user' ? 'user' : 'ai'}`;
   const roleLabel = role === 'user' ? '你' : role === 'system' ? '系统' : 'AI';
-  const roleIcon = role === 'user' ? '👤' : role === 'system' ? '💡' : '🤖';
+  const roleIcon  = role === 'user' ? '👤' : role === 'system' ? '💡' : '🤖';
   if (isHtml) {
     div.innerHTML = `<div class="msg-role">${roleIcon} ${roleLabel}</div><div class="msg-text">${text}</div>`;
   } else {
@@ -2463,376 +1643,137 @@ function escHtml(str) {
 function showChatActions(actions) {
   const container = document.getElementById('chat-actions');
   container.innerHTML = '';
-  if (!actions || !actions.length) return;
+  if (!actions || !actions.length) { container.style.display = 'none'; return; }
   actions.forEach(action => {
     const btn = document.createElement('button');
     btn.className = 'chat-action-btn';
     btn.textContent = action.label;
-    btn.onclick = () => {
-      action.fn();
-      container.innerHTML = '';
-    };
+    btn.onclick = () => { action.fn(); container.innerHTML = ''; container.style.display = 'none'; };
     container.appendChild(btn);
   });
   container.style.display = 'flex';
 }
 
 function makeNodeLinks(text) {
-  // Convert patterns like [节点名:类型] into clickable links
-  return text.replace(/\[([^:]+):(idea|summary|question|action)\]/g, (_, name, type) => {
-    return `<span class="node-link" onclick="createNodeFromChat('${type}','${name}')">${name}</span>`;
-  });
+  return text.replace(/\[([^:]+):(idea|summary|question|action)\]/g, (_, name, type) =>
+    `<span class="node-link" onclick="createNodeFromChat('${type}','${name}')">${name}</span>`
+  );
 }
 
 function createNodeFromChat(type, name) {
   saveState();
   const cx = (canvasEl.clientWidth / 2 - transform.x) / transform.scale;
   const cy = (canvasEl.clientHeight / 2 - transform.y) / transform.scale;
-  const jitter = () => (Math.random() - 0.5) * 200;
-  createNode(type, cx + jitter(), cy + jitter(), name);
+  createNode(type, cx + (Math.random()-0.5)*200, cy + (Math.random()-0.5)*200, name);
   toast(`已创建「${name}」节点`);
 }
 
 async function sendChat() {
   const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-
-  input.value = '';
-  input.style.height = 'auto';
+  const text = input.value.trim(); if (!text) return;
+  input.value = ''; input.style.height = 'auto';
   document.getElementById('chat-send-btn').disabled = true;
-
-  // Add user message
   appendChatMsg('user', text);
   chatHistory.push({ role: 'user', content: text });
 
-  // Build canvas context
   const allContent = Object.values(nodes)
-    .map(n => {
-      const type = n.type.toUpperCase();
-      const content = n.el.querySelector('.node-content').innerText;
-      return content ? `[${type}] ${content}` : '';
-    })
-    .filter(Boolean)
-    .join('\n');
+    .map(n => { const c = n.el.querySelector('.node-content').innerText; return c ? `[${n.type.toUpperCase()}] ${c}` : ''; })
+    .filter(Boolean).join('\n');
+  const canvasContext = allContent ? `当前画布节点：\n${allContent}\n` : '当前画布为空。\n';
+  const systemPrompt = `你是一个在无限画布思维工作台上运行的 AI 助手。用户正在画布上整理想法。\n当需要生成节点时，用 [节点名称:类型] 格式标注，类型可选：idea/summary/question/action\n${canvasContext}\n请简洁回应，中文输出。`;
 
-  const canvasContext = allContent
-    ? `当前画布上的节点内容：\n${allContent}\n`
-    : '当前画布为空，暂无节点。\n';
-
-  // System instruction for smart node creation
-  const systemPrompt = `你是一个在无限画布思维工作台上运行的 AI 助手。用户正在画布上整理想法，你可以通过生成节点来帮助他们。
-
-当用户描述需要创建节点的内容时，请用以下格式回复：
-1. 先用自然语言回应用户
-2. 如果需要生成节点，用 [节点名称:类型] 格式标注，类型可选：idea/summary/question/action
-
-例如用户说"我想做B2B品牌推广"：
-可以回复："好的！以下是帮你整理的几个方向" 并在后面加上 [品牌定位:idea] [目标市场:idea] 等
-
-画布节点类型说明：
-- idea 💡：创意想法
-- summary 📋：总结归纳
-- question ❓：待研究问题
-- action 🎯：行动项
-
-${canvasContext}
-请简洁回应，优先生成实用的节点建议。`;
-
-  // Show thinking indicator
   const msgsEl = document.getElementById('chat-messages');
   const thinkingDiv = document.createElement('div');
   thinkingDiv.className = 'chat-msg ai';
-  thinkingDiv.innerHTML = `<div class="msg-role">🤖 AI</div><div class="msg-text" style="color:rgba(197,213,245,0.5);font-style:italic;">⏳ 思考中...</div>`;
+  thinkingDiv.innerHTML = `<div class="msg-role">🤖 AI</div><div class="msg-text" style="color:#aaa;font-style:italic;">⏳ 思考中...</div>`;
   msgsEl.appendChild(thinkingDiv);
   msgsEl.scrollTop = msgsEl.scrollHeight;
 
   try {
     const answer = await callAI(text, systemPrompt);
-
-    // Replace thinking with real response
     thinkingDiv.remove();
     const linkedAnswer = makeNodeLinks(answer);
-    appendChatMsg('ai', answer, true);
+    appendChatMsg('ai', linkedAnswer, true);
     chatHistory.push({ role: 'assistant', content: answer });
-    
-    // 更新 API 状态
     updateApiStatus();
 
-    // Show quick action: add top 2 node suggestions to canvas
     const matches = [...answer.matchAll(/\[([^:]+):(idea|summary|question|action)\]/g)];
     if (matches.length > 0) {
-      const actions = matches.slice(0, 3).map((m, i) => ({
+      const actions = matches.slice(0, 3).map(m => ({
         label: `➕ 创建「${m[1]}」`,
         fn: () => createNodeFromChat(m[2], m[1])
       }));
-      if (actions.length > 0) {
-        actions.push({
-          label: `➕ 全部创建 (${matches.length}个)`,
-          fn: () => {
-            matches.forEach(m => createNodeFromChat(m[2], m[1]));
-            showChatActions([]);
-          }
-        });
-        showChatActions(actions);
-      }
+      actions.push({ label: `➕ 全部创建 (${matches.length}个)`, fn: () => {
+        matches.forEach(m => createNodeFromChat(m[2], m[1]));
+        showChatActions([]);
+      }});
+      showChatActions(actions);
     }
-
   } catch (err) {
     thinkingDiv.remove();
     appendChatMsg('ai', `⚠️ 出错了：${err.message}`);
   }
-
   document.getElementById('chat-send-btn').disabled = false;
 }
 
 // ════════════════════════════════════════════
-//  SILICONFLOW API + 联网搜索
+//  SILICONFLOW API
 // ════════════════════════════════════════════
-const MCP_SERVER = 'http://localhost:3457';  // 本地 MCP AI 中转服务器
-
-// 联网搜索函数（使用 SiliconFlow 搜索API）
+// FIX: removed double-slash bug in webSearch URL
 async function webSearch(query) {
   const cfg = loadApiConfig();
   if (!cfg.key || !cfg.webSearch) return null;
-  
   try {
-    const resp = await fetch(`${cfg.base}//search`, {
+    const resp = await fetch(`${cfg.base}/search`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${cfg.key}`
-      },
-      body: JSON.stringify({
-        model: 'BAAI/bge-m3',
-        query: query,
-        count: 3
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${cfg.key}` },
+      body: JSON.stringify({ model: 'BAAI/bge-m3', query, count: 3 })
     });
-    if (resp.ok) {
-      const data = await resp.json();
-      return data.data || [];
-    }
-  } catch (e) {
-    console.log('Search unavailable:', e.message);
-  }
+    if (resp.ok) { const data = await resp.json(); return data.data || []; }
+  } catch(e) { console.log('Search unavailable:', e.message); }
   return null;
 }
 
-// SiliconFlow API 调用
-async function callSiliconFlow(messages, stream = false) {
+async function callSiliconFlow(messages) {
   const cfg = loadApiConfig();
-  
   const resp = await fetch(`${cfg.base}/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${cfg.key}`
-    },
-    body: JSON.stringify({
-      model: cfg.model,
-      messages: messages,
-      stream: stream,
-      max_tokens: 800,
-      temperature: 0.85
-    })
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${cfg.key}` },
+    body: JSON.stringify({ model: cfg.model, messages, max_tokens: 800, temperature: 0.85 })
   });
-  
   if (!resp.ok) {
     const e = await resp.json().catch(() => ({}));
     throw new Error(e.error?.message || `HTTP ${resp.status}`);
   }
-  
-  if (stream) {
-    return resp;
-  }
-  
   const data = await resp.json();
   return data.choices?.[0]?.message?.content?.trim() || '(空响应)';
 }
 
-// 主 AI 调用函数（支持联网搜索）
 async function callAI(userPrompt, customSystem = '') {
   const cfg = loadApiConfig();
-
-  // 无API Key时使用演示模式
   if (!cfg.key) {
-    await new Promise(r => setTimeout(r, 800 + Math.random() * 600));
+    await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
     return chatDemoResponse(userPrompt);
   }
-
   const system = customSystem || '你是一个帮助用户在无限画布上进行创意思维、项目研究和知识整理的 AI 助手。回答简洁、有启发性，中文输出。';
-
-  const messages = [
-    { role: 'system', content: system },
-    { role: 'user', content: userPrompt }
-  ];
-
-  // 如果启用了联网搜索且问题是需要搜索的
+  const messages = [{ role: 'system', content: system }, { role: 'user', content: userPrompt }];
   const searchTriggers = ['搜索', '查找', '查询', '最近', '最新', '现在的', '当前'];
   const needsSearch = cfg.webSearch && searchTriggers.some(t => userPrompt.includes(t));
-  
-  let searchContext = '';
   if (needsSearch) {
-    const searchResults = await webSearch(userPrompt);
-    if (searchResults && searchResults.length > 0) {
-      searchContext = '\n\n[联网搜索结果]\n' + searchResults.map((r, i) => 
-        `${i+1}. ${r.title || '标题'}: ${r.snippet || r.content || ''}`
-      ).join('\n');
-      messages[1].content += searchContext;
+    const results = await webSearch(userPrompt);
+    if (results?.length) {
+      messages[1].content += '\n\n[联网搜索结果]\n' + results.map((r, i) => `${i+1}. ${r.title || ''}: ${r.snippet || r.content || ''}`).join('\n');
     }
   }
-
-  try {
-    return await callSiliconFlow(messages);
-  } catch (err) {
-    throw err;
-  }
+  return await callSiliconFlow(messages);
 }
 
 function chatDemoResponse(prompt) {
   const lower = prompt.toLowerCase();
-  if (lower.includes('总结') || lower.includes('总结所有')) {
-    return `好的，我来帮你整理画布上的想法。\n\n[BOSENNI市场策略:summary]\n[NEXPANEL目标客群:idea]\n[Big5展会计划:action]\n[竞品分析:Q1]`;
-  }
-  if (lower.includes('想法') || lower.includes('头脑风暴')) {
-    return `基于你的描述，以下是几个扩展方向：\n\n[北美高端橱柜市场分析:idea]\n[设计师渠道拓展策略:idea]\n[DTC品牌独立站规划:action]\n`;
-  }
-  if (lower.includes('问题') || lower.includes('不确定')) {
-    return `这是一个值得深入的问题。我帮你梳理一下：\n\n[目标客群定位待确认:question]\n[供应链优先级评估:action]\n`;
-  }
-  return `好的！我帮你记录这个想法。\n\n[${prompt.slice(0,10)}...:idea]\n\n你可以点击上方按钮快速将它添加到画布上~`;
+  if (lower.includes('总结')) return `好的，我来帮你整理画布上的想法。\n\n[市场策略:summary]\n[目标客群:idea]\n[展会计划:action]`;
+  if (lower.includes('想法') || lower.includes('头脑')) return `基于你的描述，以下是几个扩展方向：\n\n[市场分析:idea]\n[渠道策略:idea]\n[品牌规划:action]`;
+  return `好的！我帮你记录这个想法。\n\n[${prompt.slice(0,10)}...:idea]\n\n你可以点击按钮将它添加到画布上~`;
 }
-// ════════════════════════════════════════════
-//  SSE REAL-TIME COMMAND SUBSCRIPTION
-// ════════════════════════════════════════════
-let sseSource = null;
-
-function connectSSE() {
-  if (sseSource) { try { sseSource.close(); } catch {} }
-  sseSource = new EventSource(MCP_SERVER + '/api/events');
-  sseSource.onopen = () => { console.log('[SSE] Connected'); };
-
-  sseSource.addEventListener('init', (e) => {
-    const data = JSON.parse(e.data);
-    // Sync cursor
-    window._sseCursor = data.cursor;
-  });
-
-  // Single command
-  sseSource.addEventListener('command', (e) => {
-    const cmd = JSON.parse(e.data);
-    window._sseCursor = (window._sseCursor || 0) + 1;
-    execCommand(cmd);
-  });
-
-  // Batch commands
-  sseSource.addEventListener('commands', (e) => {
-    const cmds = JSON.parse(e.data);
-    cmds.forEach(() => { window._sseCursor = (window._sseCursor || 0) + 1; });
-    cmds.forEach(cmd => execCommand(cmd));
-  });
-
-  sseSource.onerror = () => {
-    console.log('[SSE] Reconnecting...');
-    setTimeout(connectSSE, 3000);
-  };
-}
-
-function execCommand(cmd) {
-  if (cmd.type === 'create-node') {
-    saveState();
-    const { type, content, x, y } = cmd.payload || cmd;
-    const cx2 = (canvasEl.clientWidth / 2 - transform.x) / transform.scale;
-    const cy2 = (canvasEl.clientHeight / 2 - transform.y) / transform.scale;
-    const nodeId = createNode(type || 'idea', x ?? cx2 + (Math.random()-0.5)*200, y ?? cy2 + (Math.random()-0.5)*150, content || '', false);
-    toast(`✨ 已创建「${(content||'').slice(0,10)}...」`);
-    const el = document.getElementById(nodeId);
-    if (el) {
-      el.style.boxShadow = '0 0 0 3px rgba(91,141,238,0.6), 0 6px 36px rgba(0,0,0,0.7)';
-      setTimeout(() => { el.style.boxShadow = ''; }, 1500);
-    }
-    drawMinimap();
-
-  } else if (cmd.type === 'chat-reply') {
-    const { text } = cmd.payload || {};
-    if (!text) return;
-    // Remove thinking indicator if present
-    const msgs = document.getElementById('chat-messages');
-    const thinking = msgs?.querySelector('.loading');
-    if (thinking) thinking.remove();
-    appendChatMsg('ai', text);
-    const matches = [...text.matchAll(/\[([^\]:]+):(idea|summary|question|action)\]/g)];
-    if (matches.length > 0) {
-      const cx3 = (canvasEl.clientWidth / 2 - transform.x) / transform.scale;
-      const cy3 = (canvasEl.clientHeight / 2 - transform.y) / transform.scale;
-      const actions = matches.slice(0, 3).map(m => ({
-        label: `➕ ${m[1]}`,
-        fn: () => { saveState(); createNode(m[2], cx3 + (Math.random()-0.5)*200, cy3 + (Math.random()-0.5)*150, m[1]); }
-      }));
-      actions.push({
-        label: `全部创建 (${matches.length}个)`,
-        fn: () => {
-          saveState();
-          matches.forEach(m => createNode(m[2], cx3 + (Math.random()-0.5)*300, cy3 + (Math.random()-0.5)*200, m[1]));
-          showChatActions([]);
-        }
-      });
-      showChatActions(actions);
-    }
-
-  } else if (cmd.type === 'toast') {
-    toast(cmd.payload?.message || '');
-  }
-}
-
-// ════════════════════════════════════════════
-//  GLOBAL API — WorkBuddy 直接驱动画布
-//  用法：在 WorkBuddy 对话里粘贴调用
-// ════════════════════════════════════════════
-
-// generateNodes([{type, content, x, y}, ...])
-// 直接在画布上创建节点，零 API 调用，即时渲染
-window.generateNodes = async function(commands) {
-  if (!commands || !commands.length) return;
-  commands.forEach(cmd => execCommand({ type: 'create-node', payload: cmd }));
-  // Persist to server queue
-  const cmds = commands.map(c => ({ type: 'create-node', payload: c }));
-  await fetch(MCP_SERVER + '/api/broadcast', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(cmds)
-  }).catch(() => {});
-};
-
-// generate({type, content}) — 单个节点
-window.generate = async function(payload) {
-  await window.generateNodes([payload]);
-};
-
-// aiChat(text) — 在画布聊天面板里发消息（需要 API Key）
-window.aiChat = async function(text) {
-  if (!chatPanelOpen) toggleChatPanel();
-  appendChatMsg('user', text);
-  const msgs = document.getElementById('chat-messages');
-  const thinking = document.createElement('div');
-  thinking.className = 'chat-msg ai';
-  thinking.innerHTML = `<div class="msg-role">🤖 AI</div><div class="msg-text" style="color:rgba(197,213,245,0.5);font-style:italic;">⏳ 思考中...</div>`;
-  msgs.appendChild(thinking);
-  msgs.scrollTop = msgs.scrollHeight;
-  const res = await fetch(MCP_SERVER + '/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: text })
-  }).catch(() => null);
-  thinking.remove();
-  if (res?.ok) {
-    const d = await res.json();
-    execCommand({ type: 'chat-reply', payload: { text: d.choices?.[0]?.message?.content?.trim() || '(空响应)' } });
-  } else {
-    appendChatMsg('ai', '⚠️ MCP 服务器未运行或无 API Key');
-  }
-};
 
 // ════════════════════════════════════════════
 //  SETTINGS PANEL
@@ -2841,12 +1782,10 @@ function toggleSettingsPanel() {
   const panel = document.getElementById('settings-panel');
   const overlay = document.getElementById('settings-overlay');
   if (panel.style.display === 'none') {
-    // 加载当前配置
     document.getElementById('sf-api-key').value = localStorage.getItem('sf_key') || '';
     document.getElementById('sf-model').value = localStorage.getItem('sf_model') || 'Qwen/Qwen2.5-7B-Instruct';
     document.getElementById('sf-websearch').checked = localStorage.getItem('sf_websearch') !== 'false';
-    panel.style.display = 'block';
-    overlay.style.display = 'block';
+    panel.style.display = 'block'; overlay.style.display = 'block';
   } else {
     closeSettingsPanel();
   }
@@ -2861,104 +1800,15 @@ function saveSettings() {
   const key = document.getElementById('sf-api-key').value.trim();
   const model = document.getElementById('sf-model').value;
   const webSearch = document.getElementById('sf-websearch').checked;
-  
   saveApiConfig(key, model, webSearch);
-  closeSettingsPanel();
-  updateApiStatus();
+  closeSettingsPanel(); updateApiStatus();
   toast(key ? '✅ API 设置已保存' : '⚠️ 已清除 API Key');
 }
 
-// 保存画布到文件
-function saveCanvasToFile() {
-  const data = {
-    version: 1,
-    nodes: Object.fromEntries(
-      Object.entries(nodes).map(([id, n]) => [id, {
-        type: n.type,
-        x: n.x,
-        y: n.y,
-        content: n.el.querySelector('.node-content')?.innerText || '',
-        htmlContent: n.el.querySelector('.node-content')?.innerHTML || '',
-        width: n.el.offsetWidth,
-        height: n.el.offsetHeight
-      }])
-    ),
-    connections: connections.map(c => ({...c})),
-    nodeCounter
-  };
-  
-  const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `mindflow-canvas-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  closeSettingsPanel();
-  toast('✅ 画布已保存');
-}
-
-// 从文件加载画布
-function loadCanvasFromFile(input) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      
-      // 清空当前画布
-      Object.values(nodes).forEach(n => n.el && n.el.remove());
-      nodes = {};
-      connections = [];
-      selectedNodes = [];
-      undoStack = [];
-      redoStack = [];
-      updateUndoRedoBtns();
-      
-      // 恢复节点
-      nodeCounter = data.nodeCounter || 0;
-      Object.entries(data.nodes || {}).forEach(([id, nd]) => {
-        createNode(
-          nd.type || 'idea',
-          nd.x || 100,
-          nd.y || 100,
-          nd.content || '',
-          false,
-          nd.width || 200,
-          nd.height || 100,
-          nd.htmlContent || null
-        );
-      });
-      
-      // 恢复连线
-      (data.connections || []).forEach(c => {
-        if (nodes[c.from] && nodes[c.to]) {
-          connections.push({ from: c.from, to: c.to });
-        }
-      });
-      
-      drawConnections();
-      drawMinimap();
-      closeSettingsPanel();
-      toast(`✅ 已加载 ${Object.keys(nodes).length} 个节点`);
-    } catch (err) {
-      toast('❌ 文件格式错误');
-      console.error(err);
-    }
-    input.value = '';
-  };
-  reader.readAsText(file);
-}
-
-// 更新 API 状态指示器
 function updateApiStatus() {
   const cfg = loadApiConfig();
   const statusEl = document.getElementById('api-status');
-  const hintEl = document.getElementById('chat-api-hint');
-  
+  const hintEl   = document.getElementById('chat-api-hint');
   if (cfg.key) {
     statusEl.textContent = '✅ 已连接';
     statusEl.style.background = 'rgba(80,200,120,0.15)';
@@ -2973,31 +1823,82 @@ function updateApiStatus() {
 }
 
 // ════════════════════════════════════════════
+//  FILE SAVE / LOAD
+// ════════════════════════════════════════════
+function saveCanvasToFile() {
+  const data = {
+    version: 1,
+    nodes: Object.fromEntries(
+      Object.entries(nodes).map(([id, n]) => [id, {
+        type: n.type, x: n.x, y: n.y,
+        content: n.el.querySelector('.node-content')?.innerText || '',
+        htmlContent: n.el.querySelector('.node-content')?.innerHTML || '',
+        width: n.el.offsetWidth, height: n.el.offsetHeight
+      }])
+    ),
+    connections: connections.map(c => ({...c})),
+    nodeCounter
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `nexflow-canvas-${Date.now()}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  closeSettingsPanel(); toast('✅ 画布已保存');
+}
+
+function loadCanvasFromFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      Object.values(nodes).forEach(n => n.el && n.el.remove());
+      nodes = {}; connections = []; selectedNodes = [];
+      undoStack = []; redoStack = []; updateUndoRedoBtns();
+      nodeCounter = data.nodeCounter || 0;
+      // FIX: restore nodes with original IDs to preserve connection references
+      Object.entries(data.nodes || {}).forEach(([id, nd]) => {
+        // Ensure counter won't collide
+        const num = parseInt(id.replace('n', ''));
+        if (!isNaN(num) && num >= nodeCounter) nodeCounter = num;
+        const el = buildNodeEl(id, nd.type || 'idea', nd.x || 100, nd.y || 100, nd.width || 200, nd.height || 100, nd.htmlContent || nd.content || '');
+        canvasLayer.appendChild(el);
+        nodes[id] = { el, x: nd.x || 100, y: nd.y || 100, type: nd.type || 'idea', content: nd.content || '' };
+        setupNodeEvents(el, id);
+      });
+      (data.connections || []).forEach(c => {
+        if (nodes[c.from] && nodes[c.to]) connections.push({ from: c.from, to: c.to });
+      });
+      drawConnections(); drawMinimap();
+      closeSettingsPanel();
+      toast(`✅ 已加载 ${Object.keys(nodes).length} 个节点`);
+    } catch (err) {
+      toast('❌ 文件格式错误'); console.error(err);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ════════════════════════════════════════════
 //  CLOUD SYNC
 // ════════════════════════════════════════════
 let currentRoom = null;
 let syncTimer = null;
-const SYNC_DEBOUNCE = 3000; // 3秒防抖自动保存
+const SYNC_DEBOUNCE = 3000;
 
-// 获取 API base（同域）
-function apiBase() {
-  // 本地开发时直接返回 /api，部署后也是 /api
-  return '/api';
-}
+function apiBase() { return '/api'; }
 
-// 读取画布数据结构（供保存用）
 function getCanvasSnapshot() {
   return {
     version: 1,
     nodes: Object.fromEntries(
       Object.entries(nodes).map(([id, n]) => [id, {
-        type: n.type,
-        x: n.x,
-        y: n.y,
+        type: n.type, x: n.x, y: n.y,
         content: n.el.querySelector('.node-content')?.innerText || '',
         htmlContent: n.el.querySelector('.node-content')?.innerHTML || '',
-        width: n.el.offsetWidth,
-        height: n.el.offsetHeight
+        width: n.el.offsetWidth, height: n.el.offsetHeight
       }])
     ),
     connections: connections.map(c => ({...c})),
@@ -3005,48 +1906,30 @@ function getCanvasSnapshot() {
   };
 }
 
-// 恢复画布（从快照）
 function applySnapshot(data) {
   Object.values(nodes).forEach(n => n.el && n.el.remove());
-  nodes = {};
-  connections = [];
-  selectedNodes = [];
-  undoStack = [];
-  redoStack = [];
-  updateUndoRedoBtns();
-
+  nodes = {}; connections = []; selectedNodes = [];
+  undoStack = []; redoStack = []; updateUndoRedoBtns();
   nodeCounter = data.nodeCounter || 0;
   Object.entries(data.nodes || {}).forEach(([id, nd]) => {
-    createNode(
-      nd.type || 'idea',
-      nd.x || 100,
-      nd.y || 100,
-      nd.content || '',
-      false,
-      nd.width || 200,
-      nd.height || 100,
-      nd.htmlContent || null
-    );
+    const num = parseInt(id.replace('n', ''));
+    if (!isNaN(num) && num >= nodeCounter) nodeCounter = num;
+    const el = buildNodeEl(id, nd.type || 'idea', nd.x || 100, nd.y || 100, nd.width || 200, nd.height || 100, nd.htmlContent || nd.content || '');
+    canvasLayer.appendChild(el);
+    nodes[id] = { el, x: nd.x || 100, y: nd.y || 100, type: nd.type || 'idea', content: nd.content || '' };
+    setupNodeEvents(el, id);
   });
-
   (data.connections || []).forEach(c => {
     if (nodes[c.from] && nodes[c.to]) connections.push({ from: c.from, to: c.to });
   });
-
-  drawConnections();
-  drawMinimap();
+  drawConnections(); drawMinimap();
 }
 
-// 云端保存
 async function cloudSave(silent = false) {
   if (!currentRoom) return;
   const syncEl = document.getElementById('sync-status');
   try {
-    if (!silent) {
-      syncEl.textContent = '☁️ 保存中...';
-      syncEl.style.opacity = '1';
-      syncEl.style.color = '#F79E58';
-    }
+    if (!silent) { syncEl.textContent = '☁️ 保存中...'; syncEl.style.opacity = '1'; syncEl.style.color = '#F79E58'; }
     const res = await fetch(`${apiBase()}/canvas?room=${currentRoom}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3054,89 +1937,63 @@ async function cloudSave(silent = false) {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || '保存失败');
-
     if (!silent) {
-      syncEl.textContent = '✅ 已同步';
-      syncEl.style.color = '#50c878';
+      syncEl.textContent = '✅ 已同步'; syncEl.style.color = '#50c878';
       setTimeout(() => { syncEl.style.opacity = '0'; }, 2000);
     }
   } catch (err) {
     if (!silent) {
-      syncEl.textContent = '❌ 同步失败';
-      syncEl.style.color = '#e05c5c';
-      syncEl.style.opacity = '1';
+      syncEl.textContent = '❌ 同步失败'; syncEl.style.color = '#e05c5c'; syncEl.style.opacity = '1';
       setTimeout(() => { syncEl.style.opacity = '0'; }, 3000);
     }
     console.error('cloudSave error:', err);
   }
 }
 
-// 防抖自动保存（每次 saveState 后触发）
 function scheduleCloudSave() {
   if (!currentRoom) return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => cloudSave(true), SYNC_DEBOUNCE);
 }
 
-// 云端加载
 async function cloudLoad(room) {
   const res = await fetch(`${apiBase()}/canvas?room=${room}`);
   if (!res.ok) throw new Error('读取失败');
-  const json = await res.json();
-  return json; // { exists, canvas }
+  return await res.json();
 }
 
-// 进入房间
 async function enterRoom() {
   const input = document.getElementById('room-input');
   const errEl = document.getElementById('gate-err');
-  const btn = document.getElementById('gate-enter-btn');
-  const room = input.value.trim().toLowerCase();
-
+  const btn   = document.getElementById('gate-enter-btn');
+  const room  = input.value.trim().toLowerCase();
   if (!room || !/^[a-z0-9-]{3,32}$/.test(room)) {
-    errEl.textContent = '请输入 3-32 位字母、数字或连字符';
-    return;
+    errEl.textContent = '请输入 3-32 位字母、数字或连字符'; return;
   }
-
-  btn.disabled = true;
-  btn.textContent = '连接中...';
-  errEl.textContent = '';
-
+  btn.disabled = true; btn.textContent = '连接中...'; errEl.textContent = '';
   try {
     const { exists, canvas } = await cloudLoad(room);
-
     currentRoom = room;
-
-    // 隐藏入口页
     document.getElementById('room-gate').classList.add('hidden');
     document.getElementById('room-label').textContent = `房间：${room}`;
-
-    // 初始化画布
     updateApiStatus();
     if (exists && canvas) {
       applySnapshot(canvas);
       toast(`✅ 已加载房间「${room}」，共 ${Object.keys(nodes).length} 个节点`);
     } else {
-      // 新房间：创建初始节点
       const cx = 500, cy = 300;
-      createNode('idea', cx - 140, cy - 80, 'Nexpanel 品牌策略', false, 200, 100);
+      createNode('idea', cx - 140, cy - 80, 'NexFlow 思维画布', false, 200, 100);
       drawMinimap();
       toast(`🆕 新房间「${room}」已创建`);
       cloudSave(true);
     }
-
-    // 挂载防抖保存（覆盖原始 saveState）
+    // Patch saveState to also schedule cloud sync
     const _origSaveState = saveState;
-    window.saveState = function() {
-      _origSaveState();
-      scheduleCloudSave();
-    };
-
+    window.saveState = function() { _origSaveState(); scheduleCloudSave(); };
     setTimeout(() => toast('💡 双击画布新建节点'), 3000);
   } catch (err) {
     errEl.textContent = '连接失败，请检查网络后重试';
-    btn.disabled = false;
-    btn.textContent = '进入画布 →';
+    btn.disabled = false; btn.textContent = '进入画布 →';
     console.error(err);
   }
 }
@@ -3146,9 +2003,7 @@ async function enterRoom() {
 // ════════════════════════════════════════════
 function init() {
   updateApiStatus();
-  // 画布由进入房间后初始化，这里不创建节点
 }
-
 init();
 </script>
 </body>
