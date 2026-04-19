@@ -794,7 +794,7 @@ function setupNodeEvents(el, id) {
     el.style.width = newW + 'px'; el.style.height = newH + 'px';
     drawConnections();
   });
-  window.addEventListener('mouseup', () => { if (resizing) { resizing = false; drawMinimap(); } });
+  window.addEventListener('mouseup', () => { if (resizing) { resizing = false; drawMinimap(); saveState(); } });
 
   // 4角 resize
   let cornerResizing = false, cornerDir = '', crsx, crsy, crox, croy, crsw, crsh;
@@ -826,7 +826,7 @@ function setupNodeEvents(el, id) {
     el.style.width = newW + 'px'; el.style.height = newH + 'px';
     drawConnections();
   });
-  window.addEventListener('mouseup', () => { if (cornerResizing) { cornerResizing = false; drawMinimap(); } });
+  window.addEventListener('mouseup', () => { if (cornerResizing) { cornerResizing = false; drawMinimap(); saveState(); } });
 
   // 右下角双击自动适应
   const fitHandle = el.querySelector('.node-resize-corner.br[data-fit="true"]');
@@ -1086,7 +1086,7 @@ function createNode(type, x, y, content = '', autoFocus = true, width = 200, hei
     el.style.width = newW + 'px'; el.style.height = newH + 'px';
     drawConnections();
   });
-  window.addEventListener('mouseup', () => { if (resizing) { resizing = false; drawMinimap(); } });
+  window.addEventListener('mouseup', () => { if (resizing) { resizing = false; drawMinimap(); saveState(); } });
 
   // 4角 resize
   let cornerResizing = false, cornerDir = '', crsx, crsy, crox, croy, crsw, crsh;
@@ -1118,7 +1118,7 @@ function createNode(type, x, y, content = '', autoFocus = true, width = 200, hei
     el.style.width = newW + 'px'; el.style.height = newH + 'px';
     drawConnections();
   });
-  window.addEventListener('mouseup', () => { if (cornerResizing) { cornerResizing = false; drawMinimap(); } });
+  window.addEventListener('mouseup', () => { if (cornerResizing) { cornerResizing = false; drawMinimap(); saveState(); } });
 
   const fitHandle = el.querySelector('.node-resize-corner.br[data-fit="true"]');
   if (fitHandle) fitHandle.addEventListener('dblclick', (e) => { e.stopPropagation(); fitNodeToContent(id); });
@@ -1334,6 +1334,7 @@ function makeDraggable(el, id) {
       document.body.style.cursor = '';
       el.classList.remove('dragging');
       drawMinimap();
+      saveState(); // save position after drag so it's undoable
     }
   });
 
