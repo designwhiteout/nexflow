@@ -634,6 +634,11 @@ let nodeCounter = 0;
 let selectedNodes = [];
 let chatHistory = [];
 
+// 全局拖拽状态（多选拖拽统一管理）
+let _dragActive = false;
+let _dragStartX = 0, _dragStartY = 0;
+let _dragOffsets = []; // [{id, ox, oy}]
+
 // 撤销/重做
 let undoStack = [];
 let redoStack = [];
@@ -1364,9 +1369,7 @@ function applyFormat(nodeId, type) {
 //  DRAG NODES
 // ════════════════════════════════════════════
 function makeDraggable(el, id) {
-  let dragging = false, sx, sy;
-  let dragOffsets = [];
-
+  // 记录所有选中节点原始位置的回调（供外部注册）
   el.addEventListener('mousedown', (e) => {
     if (e.target.closest('.node-btn') ||
         e.target.closest('.node-content') ||
@@ -1377,37 +1380,14 @@ function makeDraggable(el, id) {
         e.target.tagName === 'TEXTAREA' ||
         e.target.tagName === 'INPUT') return;
     e.preventDefault();
-    dragging = true;
-    sx = e.clientX; sy = e.clientY;
+    if (_dragActive) return; // 防止重复触发
     if (!selectedNodes.includes(id)) selectNode(id);
-    dragOffsets = selectedNodes.map(sid => ({ id: sid, ox: nodes[sid].x, oy: nodes[sid].y }));
+    _dragActive = true;
+    _dragStartX = e.clientX;
+    _dragStartY = e.clientY;
+    _dragOffsets = selectedNodes.map(sid => ({ id: sid, ox: nodes[sid].x, oy: nodes[sid].y }));
     el.classList.add('dragging');
     document.body.style.cursor = 'grabbing';
-  });
-
-  window.addEventListener('mousemove', (e) => {
-    if (!dragging) return;
-    const dx = (e.clientX - sx) / transform.scale;
-    const dy = (e.clientY - sy) / transform.scale;
-    dragOffsets.forEach(offset => {
-      if (nodes[offset.id]) {
-        nodes[offset.id].x = offset.ox + dx;
-        nodes[offset.id].y = offset.oy + dy;
-        nodes[offset.id].el.style.left = nodes[offset.id].x + 'px';
-        nodes[offset.id].el.style.top  = nodes[offset.id].y + 'px';
-      }
-    });
-    drawConnections();
-  });
-
-  window.addEventListener('mouseup', () => {
-    if (dragging) {
-      dragging = false; dragOffsets = [];
-      document.body.style.cursor = '';
-      el.classList.remove('dragging');
-      drawMinimap();
-      saveState(); // save position after drag so it's undoable
-    }
   });
 
   // 连接点
@@ -1422,6 +1402,32 @@ function makeDraggable(el, id) {
     });
   });
 }
+
+// 全局统一拖拽 handlers（替代各节点独立注册）
+window.addEventListener('mousemove', (e) => {
+  if (!_dragActive) return;
+  const dx = (e.clientX - _dragStartX) / transform.scale;
+  const dy = (e.clientY - _dragStartY) / transform.scale;
+  _dragOffsets.forEach(offset => {
+    if (nodes[offset.id]) {
+      nodes[offset.id].x = offset.ox + dx;
+      nodes[offset.id].y = offset.oy + dy;
+      nodes[offset.id].el.style.left = nodes[offset.id].x + 'px';
+      nodes[offset.id].el.style.top  = nodes[offset.id].y + 'px';
+    }
+  });
+  drawConnections();
+});
+
+window.addEventListener('mouseup', () => {
+  if (!_dragActive) return;
+  _dragActive = false;
+  _dragOffsets = [];
+  document.body.style.cursor = '';
+  document.querySelectorAll('.node.dragging').forEach(el => el.classList.remove('dragging'));
+  drawMinimap();
+  saveState();
+});
 
 // ════════════════════════════════════════════
 //  CONNECTIONS
