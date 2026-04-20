@@ -129,6 +129,19 @@
     box-shadow: 0 0 0 3px rgba(247,158,88,0.7);
     opacity: 1;
   }
+  /* 连线高亮：被选中节点相关的连线 */
+  .conn-highlight {
+    stroke: #F79E58 !important;
+    stroke-width: 3.5 !important;
+    stroke-dasharray: none !important;
+    opacity: 1 !important;
+  }
+  /* 被连线连接到的节点高亮 */
+  .node.conn-linked {
+    border-color: #F79E58;
+    box-shadow: 0 0 0 4px rgba(247,158,88,0.35), 0 4px 20px rgba(0,0,0,0.12);
+    z-index: 13;
+  }
 
   /* 文字格式工具栏 */
   .format-toolbar {
@@ -967,6 +980,13 @@ canvasEl.addEventListener('mousedown', (e) => {
   if (e.target === canvasEl || e.target === canvasLayer || e.target === svgLayer) {
     Object.values(nodes).forEach(n => n.el.classList.remove('selected'));
     selectedNodes = [];
+    svgLayer.querySelectorAll('path[data-from]').forEach(p => {
+      p.classList.remove('conn-highlight');
+      p.setAttribute('stroke', 'rgba(247,158,88,0.5)');
+      p.setAttribute('stroke-width', '1.8');
+      p.setAttribute('stroke-dasharray', '5,3');
+    });
+    Object.values(nodes).forEach(nd => nd.el.classList.remove('conn-linked'));
     window.getSelection()?.removeAllRanges();
   }
   isDraggingCanvas = true;
@@ -1189,12 +1209,64 @@ function selectNode(id, addToSelection = false) {
   if (!addToSelection) {
     selectedNodes.forEach(sid => document.getElementById(sid)?.classList.remove('selected'));
     selectedNodes = [];
+    // 清除所有连线高亮和节点高亮
+    svgLayer.querySelectorAll('.conn-highlight').forEach(p => p.classList.remove('conn-highlight'));
+    svgLayer.querySelectorAll('path:not([pointer-events="none"])').forEach(p => {
+      p.setAttribute('stroke', 'rgba(247,158,88,0.5)');
+      p.setAttribute('stroke-width', '1.8');
+      p.setAttribute('stroke-dasharray', '5,3');
+    });
+    Object.values(nodes).forEach(nd => nd.el.classList.remove('conn-linked'));
   }
   if (id && !selectedNodes.includes(id)) {
     selectedNodes.push(id);
     document.getElementById(id)?.classList.add('selected');
+    // 高亮该节点相关的连线
+    highlightConnections();
+    highlightConnectedNodes();
   }
 }
+
+function highlightConnections() {
+  if (selectedNodes.length === 0) return;
+  svgLayer.querySelectorAll('path[data-from]').forEach(path => {
+    const fromId = path.getAttribute('data-from');
+    const toId = path.getAttribute('data-to');
+    if (selectedNodes.includes(fromId) || selectedNodes.includes(toId)) {
+      path.classList.add('conn-highlight');
+    }
+  });
+}
+
+function highlightConnectedNodes() {
+  if (selectedNodes.length === 0) return;
+  const linkedIds = new Set();
+  connections.forEach(c => {
+    if (selectedNodes.includes(c.from)) linkedIds.add(c.to);
+    if (selectedNodes.includes(c.to)) linkedIds.add(c.from);
+  });
+  linkedIds.forEach(id => {
+    if (nodes[id]) nodes[id].el.classList.add('conn-linked');
+  });
+}
+
+// 点击连线时选中两端节点
+svgLayer.addEventListener('click', (e) => {
+  const path = e.target.closest('path[data-from]');
+  if (!path) return;
+  const fromId = path.getAttribute('data-from');
+  const toId = path.getAttribute('data-to');
+  selectNode(fromId);
+  if (toId && nodes[toId]) {
+    const el = document.getElementById(toId);
+    if (el) {
+      el.classList.add('selected');
+      if (!selectedNodes.includes(toId)) selectedNodes.push(toId);
+    }
+  }
+  highlightConnections();
+  highlightConnectedNodes();
+});
 
 function onNodeInput(id, el) {
   if (nodes[id]) nodes[id].content = el.innerText;
@@ -1425,8 +1497,13 @@ function drawConnections() {
     path.setAttribute('stroke', 'rgba(247,158,88,0.5)');
     path.setAttribute('stroke-width', '1.8');
     path.setAttribute('stroke-dasharray', '5,3');
+    path.setAttribute('data-from', c.from);
+    path.setAttribute('data-to', c.to);
+    path.style.cursor = 'pointer';
     svgLayer.appendChild(path);
   });
+  // 重新应用连线高亮
+  highlightConnections();
 }
 
 // ════════════════════════════════════════════
